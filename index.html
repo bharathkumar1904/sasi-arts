@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sasi Arts & Photo Frames | Personalized Gifts</title>
+  <meta name="description" content="Create personalized photo frames, LED frames, acrylic gifts, moon lamps, and custom gifts. Premium quality gifts delivered across India.">
+  <meta name="keywords" content="personalized gifts, photo frames, custom gifts, LED frames, acrylic gifts, moon lamps, magic mirrors, photo mugs">
+  <meta name="geo.region" content="IN-AP">
+  <meta name="geo.placename" content="Rajanagaram">
+  <link rel="canonical" href="https://sasiarts.in">
+  <meta property="og:title" content="Sasi Arts & Photo Frames | Personalized Gifts">
+  <meta property="og:description" content="Create beautiful personalized gifts for your loved ones. Premium quality custom photo frames, LED frames, and more.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sasiarts.in">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?w=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="left">
+        <span><i class="fas fa-phone"></i> <a href="tel:+918106545049">+91 8106545049</a></span>
+        <span class="hide-mobile"><i class="fas fa-clock"></i> Mon-Sat: 9AM-8PM</span>
+      </div>
+      <div class="right">
+        <a href="https://www.instagram.com/sasi_arts_and_photo_frames" target="_blank"><i class="fab fa-instagram"></i> Follow</a>
+        <a href="https://wa.me/918106545049" target="_blank"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>
+        <a href="#track-order"><i class="fas fa-truck"></i> Track Order</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header" id="header">
+    <div class="container">
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+      <a href="/" class="logo">
+        <div>
+          Sasi <span>Arts</span>
+          <small class="subtitle">Photo Frames & Gifts</small>
+        </div>
+      </a>
+      <div class="search-bar" id="searchBar">
+        <input type="text" placeholder="Search gifts..." id="searchInput" onkeyup="handleSearch(event)">
+        <button onclick="handleSearchClick()"><i class="fas fa-search"></i></button>
+        <div id="searchResults" style="position:absolute;top:100%;left:0;right:0;background:var(--light);border-radius:0 0 12px 12px;box-shadow:var(--shadow-lg);z-index:100;display:none;max-height:400px;overflow-y:auto;"></div>
+      </div>
+      <div class="header-actions">
+        <button class="action-btn" onclick="openWhatsAppKart()" aria-label="WhatsApp Kart" title="WhatsApp Kart">
+          <i class="fab fa-whatsapp"></i>
+          <span class="badge wk-count" id="wkCount">0</span>
+        </button>
+        <button class="action-btn" onclick="toggleWishlist()" aria-label="Wishlist" title="Wishlist">
+          <i class="fas fa-heart"></i>
+          <span class="badge wishlist-count" id="wishlistCount">0</span>
+        </button>
+        <button class="action-btn" onclick="openCart()" aria-label="Cart" title="Shopping Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="badge cart-count" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN NAV -->
+  <nav class="main-nav" id="mainNav">
+    <div class="mobile-nav-header">
+      <span style="font-weight:600;">Menu</span>
+      <button onclick="toggleMobileMenu()" style="font-size:20px;">&times;</button>
+    </div>
+    <div class="container">
+      <ul>
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="javascript:void(0)" onclick="openShop()">Shop</a></li>
+        <li><a href="#best-sellers">Best Sellers</a></li>
+        <li><a href="#product-builder">Customize</a></li>
+        <li><a href="#deals">Today's Deal</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="javascript:void(0)" onclick="openWhatsAppKart()">WhatsApp Kart</a></li>
+        <li><a href="#track-order">Track Order</a></li>
+        <li><a href="#corporate">Corporate</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="nav-overlay" id="navOverlay" onclick="toggleMobileMenu()"></div>
+
+  <!-- HERO BANNER -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <img src="https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?w=1600" alt="Personalized Gifts">
+      <div class="overlay"></div>
+    </div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-gift"></i> Premium Personalized Gifts</div>
+        <h1>Create <span>Memories</span> Through Personalized Gifts</h1>
+        <p>Turn your precious moments into timeless keepsakes. Custom photo frames, LED frames, acrylic gifts, and more. Made with love, delivered with care.</p>
+        <div class="hero-actions">
+          <a href="javascript:void(0)" onclick="openShop()" class="btn btn-primary btn-lg">Shop Now <i class="fas fa-arrow-right"></i></a>
+          <a href="#product-builder" class="btn btn-outline btn-lg">Upload Photo <i class="fas fa-upload"></i></a>
+          <a href="https://wa.me/918106545049" target="_blank" class="btn btn-whatsapp btn-lg"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <section class="trust-bar">
+    <div class="container">
+      <div class="trust-grid">
+        <div class="trust-item"><span class="icon"><i class="fas fa-truck"></i></span><span class="text">Free Shipping</span><span class="subtext">On orders above &#8377;499</span></div>
+        <div class="trust-item"><span class="icon"><i class="fas fa-shield-alt"></i></span><span class="text">Secure Payments</span><span class="subtext">100% secure checkout</span></div>
+        <div class="trust-item"><span class="icon"><i class="fas fa-undo"></i></span><span class="text">Easy Returns</span><span class="subtext">7-day return policy</span></div>
+        <div class="trust-item"><span class="icon"><i class="fas fa-star"></i></span><span class="text">4.8 Rating</span><span class="subtext">Google rated store</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP BY CATEGORY -->
+  <section class="section" id="categories">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Categories</span>
+        <h2>Shop By Category</h2>
+        <p>Find the perfect personalized gift for every occasion</p>
+      </div>
+      <div class="categories-grid" id="categoriesGrid">
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOM ART SERVICES -->
+  <section class="section" id="art-services" style="background:linear-gradient(135deg,#1A1A2E 0%,#16213E 100%);color:#fff;padding:60px 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle" style="color:var(--secondary);">Art Services</span>
+        <h2 style="color:#fff;">Custom Art & Portrait Services</h2>
+        <p style="color:var(--gray-400);">Hand-crafted art from your photos. Two exclusive services.</p>
+      </div>
+      <div class="art-services-grid" id="artServicesGrid"></div>
+    </div>
+  </section>
+
+  <!-- BEST SELLERS -->
+  <section class="section" id="best-sellers" style="background:var(--gray-100);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Bestsellers</span>
+        <h2>Most Loved Products</h2>
+        <p>Our customers' favorite personalized gifts</p>
+      </div>
+      <div class="products-grid" id="productsGrid">
+      </div>
+      <div class="text-center mt-3">
+        <a href="javascript:void(0)" onclick="openShop()" class="btn btn-primary">View All Products <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT BUILDER -->
+  <section class="section" id="product-builder">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Customize</span>
+        <h2>Design Your Gift</h2>
+        <p>Step 1: Choose a category & product → Step 2: Customize with your photo & text</p>
+      </div>
+
+      <!-- Step 1: Choose Category -->
+      <div id="builderStep1">
+        <div style="text-align:center;margin-bottom:24px;">
+          <span style="display:inline-block;background:var(--primary);color:var(--light);width:36px;height:36px;border-radius:50%;line-height:36px;font-weight:700;font-size:16px;margin-bottom:8px;">1</span>
+          <h3 style="font-size:1.2rem;color:var(--dark);">Choose a Product Category</h3>
+        </div>
+        <div class="categories-grid" id="builderCategoriesGrid">
+        </div>
+      </div>
+
+      <!-- Step 2: Choose Product -->
+      <div id="builderStep2" style="display:none;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="builderBackToCategories()" style="border-color:var(--gray-300);color:var(--gray-600);"><i class="fas fa-arrow-left"></i> Change Category</button>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:var(--light);padding:4px 14px;border-radius:50px;font-size:13px;font-weight:500;"><span style="display:inline-block;background:rgba(255,255,255,0.2);width:24px;height:24px;border-radius:50%;line-height:24px;text-align:center;font-size:12px;">2</span> Choose your product</span>
+          <span id="builderSelectedCategory" style="font-size:14px;color:var(--primary);font-weight:600;"></span>
+        </div>
+        <div class="products-grid" id="builderProductsGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+        </div>
+      </div>
+
+      <!-- Step 3: Customize -->
+      <div id="builderStep3" style="display:none;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="builderBackToProducts()" style="border-color:var(--gray-300);color:var(--gray-600);"><i class="fas fa-arrow-left"></i> Choose Different Product</button>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#22C55E;color:var(--light);padding:4px 14px;border-radius:50px;font-size:13px;font-weight:500;"><span style="display:inline-block;background:rgba(255,255,255,0.2);width:24px;height:24px;border-radius:50%;line-height:24px;text-align:center;font-size:12px;">3</span> Customize your gift</span>
+        </div>
+        <div class="product-builder">
+          <div class="builder-layout">
+            <div class="builder-preview" id="builderPreview">
+              <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <div id="builderSelectedInfo" style="text-align:center;margin-bottom:12px;width:100%;">
+                  <img id="builderSelectedImg" src="" style="max-height:180px;border-radius:var(--radius-md);margin-bottom:8px;display:none;">
+                  <h4 id="builderSelectedName" style="font-size:16px;color:var(--dark);"></h4>
+                  <div id="builderSelectedPrice" style="font-size:18px;font-weight:700;color:var(--primary);"></div>
+                </div>
+                <div class="placeholder" id="previewPlaceholder">
+                  <span class="icon"><i class="fas fa-image"></i></span>
+                  <p>Upload your photo to see preview</p>
+                </div>
+                <img id="previewImage" style="display:none;max-height:250px;border-radius:var(--radius-md);">
+                <div id="previewText" style="position:absolute;font-size:24px;font-weight:600;color:var(--dark);text-align:center;padding:20px;pointer-events:none;"></div>
+              </div>
+            </div>
+            <div class="builder-form">
+              <div class="form-group">
+                <label>Upload Your Photo <span style="color:#FF4444;">*</span></label>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('photoInput').click()">
+                  <span class="icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                  <p>Drag & drop or click to upload</p>
+                  <small class="hint">JPG, PNG, WEBP (max 10MB)</small>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+              </div>
+              <div class="form-group">
+                <label>Custom Text</label>
+                <input type="text" id="customText" placeholder="Enter your message..." oninput="updatePreview()">
+              </div>
+              <div class="form-group">
+                <label>Font Style</label>
+                <select id="fontStyle" onchange="updatePreview()">
+                  <option value="Poppins">Poppins</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Dancing Script">Dancing Script</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Size</label>
+                <select id="productSize">
+                  <option>Small (6x4 inch)</option>
+                  <option selected>Medium (8x6 inch)</option>
+                  <option>Large (12x8 inch)</option>
+                  <option>Extra Large (16x12 inch)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Material</label>
+                <select id="productMaterial">
+                  <option>Premium Wood</option>
+                  <option selected>Acrylic</option>
+                  <option>Metal</option>
+                  <option>Glass</option>
+                  <option>LED Backlit</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-lg" onclick="addCustomProduct()" style="width:100%;justify-content:center;">
+                <i class="fas fa-shopping-cart"></i> Add to Cart &mdash; <span id="builderPrice">&#8377;499</span>
+              </button>
+              <button class="btn btn-whatsapp btn-lg" onclick="addCustomToWhatsApp()" style="width:100%;justify-content:center;margin-top:8px;">
+                <i class="fab fa-whatsapp"></i> Order on WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TODAY'S DEAL -->
+  <section class="section todays-deal" id="deals">
+    <div class="container">
+      <div class="deal-content">
+        <div class="deal-image">
+          <img id="dealImage" src="https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?w=600" alt="Today's Deal">
+        </div>
+        <div class="deal-info">
+          <span class="section-subtitle" style="color:var(--secondary);">Today's Special Offer</span>
+          <h2 id="dealTitle">Premium LED Photo Frame</h2>
+          <p id="dealDesc" style="color:var(--gray-400);">Beautiful LED backlit photo frame with custom engraving. Perfect gift for any occasion.</p>
+          <div class="price">
+            <span id="dealPrice">&#8377;899</span>
+            <span class="old" id="dealOldPrice">&#8377;1,499</span>
+          </div>
+          <div class="stock-bar" style="max-width:300px;">
+            <div class="fill" id="stockFill" style="width:70%;"></div>
+          </div>
+          <div class="stock-text" id="stockText">🔥 Only 12 items left in stock! Selling fast.</div>
+          <div class="countdown" id="countdown">
+            <div class="unit"><span class="value" id="cdHours">23</span><span class="label">Hours</span></div>
+            <div class="unit"><span class="value" id="cdMinutes">59</span><span class="label">Mins</span></div>
+            <div class="unit"><span class="value" id="cdSeconds">59</span><span class="label">Secs</span></div>
+          </div>
+          <button class="btn btn-gold btn-lg mt-2" onclick="addDealToCart()"><i class="fas fa-bolt"></i> Grab This Deal</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMER GALLERY -->
+  <section class="section" id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Gallery</span>
+        <h2>Customer Creations</h2>
+        <p>Real orders crafted by our team for happy customers</p>
+      </div>
+      <div class="gallery-grid" id="galleryGrid">
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMER REVIEWS -->
+  <section class="section" id="reviews" style="background:var(--gray-100);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Reviews</span>
+        <h2>What Our Customers Say</h2>
+        <p>Real feedback from real customers across India</p>
+      </div>
+      <div class="reviews-grid" id="reviewsGrid">
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER TRACKING -->
+  <section class="section" id="track-order" style="background:var(--gray-100);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Tracking</span>
+        <h2>Track Your Order</h2>
+        <p>Enter your order ID to check the status</p>
+      </div>
+      <div class="tracking">
+        <div class="tracking-input">
+          <input type="text" id="orderIdInput" placeholder="Enter Order ID (e.g., ORD-001)">
+          <button class="btn btn-primary" onclick="trackOrder()">Track</button>
+        </div>
+        <div id="trackingResult" style="display:none;">
+          <div class="tracking-steps" id="trackingSteps"></div>
+          <div id="orderDetails" style="text-align:center;margin-top:16px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QR CATALOG -->
+  <section class="section" id="qr-catalog">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Quick Access</span>
+        <h2>Scan & Shop</h2>
+        <p>Download our QR catalog for quick access</p>
+      </div>
+      <div class="qr-grid">
+        <div class="qr-card">
+          <div class="qr-image"><div id="qrWebsite"></div></div>
+          <div class="label">Visit Website</div>
+          <button class="btn btn-primary btn-sm" onclick="downloadQR('website')">Download PDF</button>
+        </div>
+        <div class="qr-card">
+          <div class="qr-image"><div id="qrWhatsApp"></div></div>
+          <div class="label">Order via WhatsApp</div>
+          <button class="btn btn-primary btn-sm" onclick="downloadQR('whatsapp')">Download PDF</button>
+        </div>
+        <div class="qr-card">
+          <div class="qr-image"><div id="qrCatalog"></div></div>
+          <div class="label">Digital Catalog</div>
+          <button class="btn btn-primary btn-sm" onclick="downloadQR('catalog')">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CORPORATE PORTAL -->
+  <section class="section" id="corporate" style="background:var(--gray-100);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Corporate</span>
+        <h2>Corporate Gifts & Bulk Orders</h2>
+        <p>Premium customized gifts for your employees, clients, and events</p>
+      </div>
+      <div class="corporate-form" id="corporateForm">
+        <h3 style="color:var(--dark);margin-bottom:16px;">Request a Quote</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" id="corpCompany" placeholder="Your company name">
+          </div>
+          <div class="form-group">
+            <label>Contact Person</label>
+            <input type="text" id="corpName" placeholder="Your name">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="corpEmail" placeholder="email@company.com">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="corpPhone" placeholder="Phone number">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Product Interest</label>
+          <select id="corpProduct">
+            <option>Personalized Photo Frames</option>
+            <option>LED Photo Frames</option>
+            <option>Acrylic Gifts</option>
+            <option>Corporate Gift Sets</option>
+            <option>Custom Mugs</option>
+            <option>Trophies & Plaques</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="corpQty" placeholder="Estimated quantity" min="10">
+          </div>
+          <div class="form-group">
+            <label>Budget Per Item (&#8377;)</label>
+            <input type="number" id="corpBudget" placeholder="Budget per piece">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Message / Requirements</label>
+          <textarea id="corpMessage" rows="3" placeholder="Tell us about your requirements..."></textarea>
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="corpGst"> I need GST invoice</label>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="submitCorporateInquiry()" style="width:100%;justify-content:center;">
+          <i class="fas fa-paper-plane"></i> Submit Inquiry
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GIFT REMINDER -->
+  <section class="section" id="gift-reminder">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Never Forget</span>
+        <h2>Gift Reminder Service</h2>
+        <p>Store special dates and we'll remind you with gift suggestions</p>
+      </div>
+      <div class="reminder-form">
+        <div class="form-row reminder-form-row">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="reminderName" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="reminderPhone" placeholder="Phone">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Occasion</label>
+          <select id="reminderType">
+            <option value="birthday">Birthday</option>
+            <option value="anniversary">Anniversary</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="reminderDate">
+        </div>
+        <div class="form-group">
+          <label>Recipient Name (Optional)</label>
+          <input type="text" id="reminderRecipient" placeholder="Who is this for?">
+        </div>
+        <button class="btn btn-primary" onclick="setReminder()" style="width:100%;justify-content:center;">
+          <i class="fas fa-bell"></i> Set Reminder
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTAGRAM FOLLOW -->
+  <section class="section" style="background:var(--gray-100);padding:40px 0;">
+    <div class="container text-center">
+      <div style="max-width:500px;margin:0 auto;">
+        <span style="font-size:3rem;display:block;margin-bottom:8px;"><i class="fab fa-instagram" style="color:#E4405F;"></i></span>
+        <h2 style="font-family:var(--font-display);font-size:1.5rem;color:var(--dark);">Follow Us on Instagram</h2>
+        <p style="color:var(--gray-600);margin:8px 0 16px;">See our latest creations, customer photos, and behind-the-scenes</p>
+        <a href="https://www.instagram.com/sasi_arts_and_photo_frames" target="_blank" class="btn" style="background:#E4405F;color:var(--light);">
+          <i class="fab fa-instagram"></i> @sasi_arts_and_photo_frames
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="section" style="background:var(--gradient-dark);color:var(--light);">
+    <div class="container text-center">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;margin-bottom:8px;">Stay Inspired</h2>
+      <p style="color:var(--gray-400);margin-bottom:24px;">Subscribe for exclusive offers, new arrivals, and gifting ideas</p>
+      <form style="max-width:500px;margin:0 auto;display:flex;gap:8px;" onsubmit="subscribeNewsletter(event)">
+        <input type="email" id="newsletterEmail" placeholder="Enter your email" style="flex:1;padding:12px 16px;border-radius:50px;border:none;font-size:15px;" required>
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- SHOP PAGE (full-screen overlay) -->
+  <div id="shop-page" style="display:none;position:fixed;inset:0;z-index:7000;background:var(--light);overflow-y:auto;">
+    <div class="shop-topbar">
+      <button class="shop-back" onclick="closeShop()"><i class="fas fa-arrow-left"></i> Back to Home</button>
+      <h2 class="shop-title" id="shopTitle">All Products</h2>
+      <div class="shop-cart-icon">
+        <button class="action-btn" onclick="openCart()" aria-label="Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="badge cart-count" id="shopCartCount">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="shop-controls">
+      <div class="shop-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="shopSearch" placeholder="Search products..." oninput="shopSearchProducts(this.value)">
+      </div>
+      <div class="shop-filters">
+        <select id="shopCategoryFilter" onchange="shopFilterByCategory(this.value)">
+          <option value="">All Categories</option>
+        </select>
+        <select id="shopSortFilter" onchange="shopSortProducts(this.value)">
+          <option value="">Sort by</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
+      <div class="shop-categories-scroll" id="shopCategoryChips"></div>
+    </div>
+    <div class="shop-content">
+      <div class="shop-products-grid" id="shopProductsGrid"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3>Sasi <span style="color:var(--primary);">Arts</span></h3>
+          <small style="color:var(--gray-500);display:block;margin-top:-8px;margin-bottom:12px;">Photo Frames & Gifts</small>
+          <p>Creating beautiful personalized gifts since 2018. We specialize in custom photo frames, LED frames, acrylic gifts, and unique keepsakes.</p>
+          <div class="social-links">
+            <a href="https://www.instagram.com/sasi_arts_and_photo_frames" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@sasiarts" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/918106545049" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <a href="javascript:void(0)" onclick="openShop()">Shop All Products</a>
+          <a href="#best-sellers">Best Sellers</a>
+          <a href="#product-builder">Customize Gift</a>
+          <a href="#deals">Today's Deal</a>
+          <a href="#gallery">Customer Gallery</a>
+          <a href="#reviews">Reviews</a>
+          <a href="#track-order">Track Order</a>
+        </div>
+        <div>
+          <h4>Categories</h4>
+          <a href="javascript:void(0)" onclick="openShop('Personalized Photo Frames')">Photo Frames</a>
+          <a href="javascript:void(0)" onclick="openShop('LED Photo Frames')">LED Frames</a>
+          <a href="javascript:void(0)" onclick="openShop('Acrylic Gifts')">Acrylic Gifts</a>
+          <a href="javascript:void(0)" onclick="openShop('Moon Lamps')">Moon Lamps</a>
+          <a href="javascript:void(0)" onclick="openShop('Photo Mugs')">Photo Mugs</a>
+          <a href="javascript:void(0)" onclick="openShop('Corporate Gifts')">Corporate Gifts</a>
+        </div>
+        <div>
+          <h4>Contact Us</h4>
+          <ul class="contact-info">
+            <li><span class="icon"><i class="fas fa-map-marker-alt"></i></span> Rajanagaram</li>
+            <li><span class="icon"><i class="fas fa-phone"></i></span> <a href="tel:+918106545049">+91 8106545049</a></li>
+            <li><span class="icon"><i class="fab fa-whatsapp"></i></span> <a href="https://wa.me/918106545049">WhatsApp</a></li>
+            <li><span class="icon"><i class="fas fa-clock"></i></span> Mon-Sat: 9AM - 8PM</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="payment-icons">
+          <i class="fab fa-cc-visa" title="Visa"></i>
+          <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+          <i class="fab fa-cc-amex" title="Amex"></i>
+          <i class="fab fa-google-pay" title="Google Pay"></i>
+          <i class="fab fa-apple-pay" title="Apple Pay"></i>
+          <i class="fas fa-mobile-alt" title="UPI"></i>
+        </div>
+        <p>&copy; 2026 Sasi Arts & Photo Frames. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="javascript:void(0)" onclick="promptAdminPassword()" style="font-size:11px;color:var(--gray-600);text-decoration:none;opacity:0.5;">.</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING WHATSAPP -->
+  <a href="javascript:void(0)" onclick="openWhatsAppGeneral()" class="floating-whatsapp" aria-label="Chat on WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+    <span class="tooltip">Chat with us!</span>
+  </a>
+
+  <!-- CART DRAWER -->
+  <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="header">
+      <h3>Shopping Cart</h3>
+      <button onclick="closeCart()" style="font-size:24px;">&times;</button>
+    </div>
+    <div class="items" id="cartItems">
+      <div class="empty">
+        <span class="icon"><i class="fas fa-shopping-bag"></i></span>
+        <p>Your cart is empty</p>
+        <button class="btn btn-primary btn-sm mt-2" onclick="closeCart()">Start Shopping</button>
+      </div>
+    </div>
+    <div class="footer" id="cartFooter" style="display:none;">
+      <div id="deliveryEstimate" style="font-size:12px;color:var(--gray-500);margin-bottom:8px;padding:8px;background:var(--gray-50);border-radius:8px;"></div>
+      <div class="subtotal">
+        <span>Subtotal</span>
+        <span id="cartSubtotal">&#8377;0</span>
+      </div>
+      <button class="btn btn-whatsapp btn-lg" onclick="checkoutViaWhatsApp()" style="width:100%;justify-content:center;margin-bottom:8px;">
+        <i class="fab fa-whatsapp"></i> Order via WhatsApp (with details)
+      </button>
+      <button class="btn btn-primary btn-lg" onclick="checkout()" style="width:100%;justify-content:center;">
+        <i class="fas fa-lock"></i> Proceed to Pay (Razorpay)
+      </button>
+    </div>
+  </div>
+
+  <!-- WHATSAPP KART DRAWER -->
+  <div class="cart-overlay" id="wkOverlay" onclick="closeWK()"></div>
+  <div class="cart-drawer" id="wkDrawer" style="right:-400px;">
+    <div class="header">
+      <h3><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp Kart</h3>
+      <button onclick="closeWK()" style="font-size:24px;">&times;</button>
+    </div>
+    <div class="items" id="wkItems">
+      <div class="empty">
+        <span class="icon"><i class="fab fa-whatsapp" style="color:#25D366;"></i></span>
+        <p>No items in WhatsApp Kart</p>
+        <p style="font-size:13px;color:var(--gray-500);margin-top:8px;">Add products and order directly via WhatsApp</p>
+      </div>
+    </div>
+    <div class="footer" id="wkFooter" style="display:none;">
+      <div class="subtotal"><span>Total Items</span><span id="wkCount2">0</span></div>
+      <button class="btn btn-whatsapp btn-lg" onclick="sendWKMessage()" style="width:100%;justify-content:center;">
+        <i class="fab fa-whatsapp"></i> Send Order to WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- LEAD POPUP -->
+  <div class="lead-popup" id="leadPopup">
+    <div class="overlay" onclick="closeLeadPopup()"></div>
+    <div class="popup-content">
+      <button class="close-btn" onclick="closeLeadPopup()">&times;</button>
+      <div class="text-center">
+        <span style="font-size:3rem;">&#127873;</span>
+        <h2>Get 10% Off Your First Order!</h2>
+        <p style="color:var(--gray-600);margin:8px 0 16px;">Subscribe for exclusive offers & personalized gift ideas</p>
+        <div class="offer-badge">FLAT 10% OFF + FREE SHIPPING</div>
+      </div>
+      <form id="leadForm" onsubmit="submitLead(event)">
+        <div class="form-group"><input type="text" id="leadName" placeholder="Your Name" required></div>
+        <div class="form-group"><input type="tel" id="leadPhone" placeholder="Phone Number" required></div>
+        <div class="form-group"><input type="email" id="leadEmail" placeholder="Email Address"></div>
+        <div class="form-group"><input type="date" id="leadBirthday" placeholder="Birthday"></div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+          <i class="fas fa-gift"></i> Claim Your Offer
+        </button>
+      </form>
+      <p style="text-align:center;font-size:12px;color:var(--gray-500);margin-top:12px;">No spam, only gifting inspiration. Unsubscribe anytime.</p>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="product-modal" id="productModal" style="display:none;position:fixed;inset:0;z-index:8000;padding:20px;">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);" onclick="closeProductModal()"></div>
+    <div style="position:relative;background:var(--light);border-radius:var(--radius-xl);max-width:900px;margin:20px auto;max-height:90vh;overflow-y:auto;animation:scaleIn 0.3s ease;">
+      <button onclick="closeProductModal()" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:18px;border:none;cursor:pointer;z-index:1;">&times;</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:32px;">
+        <div>
+          <img id="modalProductImage" src="" style="width:100%;border-radius:var(--radius-lg);aspect-ratio:1;object-fit:cover;">
+          <div style="margin-top:16px;border:2px dashed var(--gray-300);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('modalPhotoInput').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--primary);display:block;margin-bottom:4px;"></i>
+            <small style="color:var(--gray-500);">Upload your photo to customize</small>
+          </div>
+          <input type="file" id="modalPhotoInput" accept="image/*" style="display:none" onchange="handleModalPhoto(event)">
+        </div>
+        <div>
+          <span id="modalCategory" style="font-size:12px;color:var(--primary);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;"></span>
+          <h2 id="modalProductName" style="font-family:var(--font-display);font-size:1.5rem;color:var(--dark);margin:4px 0 8px;"></h2>
+          <div id="modalRating" style="margin-bottom:8px;"></div>
+          <div id="modalPrice" style="font-size:1.5rem;font-weight:700;color:var(--primary);margin-bottom:16px;"></div>
+          <p id="modalDesc" style="color:var(--gray-600);font-size:14px;margin-bottom:16px;">Customize this gift with your photo and message. Make it truly special!</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label style="font-size:13px;font-weight:500;">Custom Text</label><input type="text" id="modalCustomText" placeholder="Enter your message..." style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;margin-top:4px;"></div>
+            <div><label style="font-size:13px;font-weight:500;">Size</label><select id="modalSize" style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;margin-top:4px;"><option>Small (6x4)</option><option selected>Medium (8x6)</option><option>Large (12x8)</option></select></div>
+            <div><label style="font-size:13px;font-weight:500;">Material</label><select id="modalMaterial" style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;margin-top:4px;"><option>Premium Wood</option><option selected>Acrylic</option><option>Metal</option><option>LED Backlit</option></select></div>
+          </div>
+          <div class="modal-actions" style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="addModalToCart()"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+            <button class="btn btn-whatsapp" style="flex:1;justify-content:center;" onclick="orderViaWhatsApp()"><i class="fab fa-whatsapp"></i> Order on WhatsApp</button>
+          </div>
+          <!-- REVIEWS -->
+          <div style="margin-top:20px;border-top:1px solid var(--gray-200);padding-top:16px;">
+            <h4 style="font-size:14px;margin:0 0 12px;">Customer Reviews</h4>
+            <div id="modalReviews" style="font-size:13px;color:var(--gray-600);margin-bottom:12px;"></div>
+            <div style="background:var(--gray-50);border-radius:8px;padding:12px;">
+              <p style="font-size:12px;font-weight:600;margin:0 0 8px;">Write a Review</p>
+              <div style="display:flex;gap:4px;margin-bottom:8px;" id="reviewStars">
+                <span onclick="setReviewRating(1)" style="cursor:pointer;font-size:20px;color:var(--gray-300);">★</span>
+                <span onclick="setReviewRating(2)" style="cursor:pointer;font-size:20px;color:var(--gray-300);">★</span>
+                <span onclick="setReviewRating(3)" style="cursor:pointer;font-size:20px;color:var(--gray-300);">★</span>
+                <span onclick="setReviewRating(4)" style="cursor:pointer;font-size:20px;color:var(--gray-300);">★</span>
+                <span onclick="setReviewRating(5)" style="cursor:pointer;font-size:20px;color:var(--gray-300);">★</span>
+              </div>
+              <input type="text" id="reviewName" placeholder="Your name" style="width:100%;padding:8px 12px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;margin-bottom:6px;box-sizing:border-box;">
+              <textarea id="reviewText" placeholder="Share your experience..." rows="2" style="width:100%;padding:8px 12px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;resize:none;margin-bottom:6px;box-sizing:border-box;"></textarea>
+              <button class="btn btn-primary btn-sm" onclick="submitReview()" style="width:100%;justify-content:center;"><i class="fas fa-paper-plane"></i> Submit Review</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERY ADDRESS FORM MODAL -->
+  <div id="deliveryFormModal" style="display:none;position:fixed;inset:0;z-index:9000;padding:20px;align-items:center;justify-content:center;">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);" onclick="closeDeliveryForm()"></div>
+    <div style="position:relative;background:var(--light);border-radius:var(--radius-xl);max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;animation:scaleIn 0.3s ease;">
+      <button onclick="closeDeliveryForm()" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:18px;border:none;cursor:pointer;">&times;</button>
+      <h3 style="font-family:var(--font-display);color:var(--dark);margin-bottom:4px;">Delivery Details</h3>
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">Enter your address to calculate exact delivery charges</p>
+      <form onsubmit="submitDeliveryAndPay(event)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Full Name *</label><input type="text" id="delName" required style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;"></div>
+          <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Phone *</label><input type="tel" id="delPhone" required style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;"></div>
+        </div>
+        <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Email</label><input type="email" id="delEmail" style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;"></div>
+        <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Address *</label><textarea id="delAddress" required style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;resize:vertical;" rows="2"></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">City *</label><input type="text" id="delCity" required style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;"></div>
+          <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">State *</label><input type="text" id="delState" required style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Pincode *</label><input type="text" id="delPincode" required maxlength="6" oninput="updateDeliveryCharge(this.value)" style="width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:8px;"></div>
+        </div>
+        <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:16px;margin:16px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span>Subtotal</span><span id="delSubtotal">₹0</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:4px;"><span>🚚 Delivery (DTDC) <small id="delChargeNote" style="color:var(--gray-500);">Enter pincode</small></span><span id="delChargeDisplay">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:4px;"><span>🧾 GST</span><span id="delTaxDisplay">₹0</span></div>
+          <input type="hidden" id="delCharge" value="0">
+          <hr style="border:none;border-top:1px solid var(--gray-200);margin:8px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;color:var(--dark);"><span>Total</span><span id="grandTotalDisplay">₹0</span></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+          <i class="fas fa-lock"></i> Pay Securely via Razorpay
+        </button>
+        <p style="text-align:center;font-size:11px;color:var(--gray-500);margin-top:8px;">🔒 Secure payment via Razorpay. UPI, Cards, NetBanking accepted.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <div id="loyaltyOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.5);" onclick="closeLoyalty()"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="js/config.js?v=6"></script>
+  <script src="js/data.js?v=6"></script>
+  <script src="js/supabase.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
+</body>
+</html>
