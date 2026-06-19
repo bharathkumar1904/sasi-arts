@@ -507,22 +507,34 @@ async function updateOffer() {
 
   if (!title || !price) { alert('Please fill product name and price'); return; }
 
-  const offer = {
+  const localOffer = {
     title, desc, price, oldPrice, stock, image, active,
     discount: Math.round((1 - price / oldPrice) * 100) + '%',
     expiry: expiry ? new Date(expiry).toISOString() : new Date(Date.now() + 86400000).toISOString(),
     updatedAt: new Date().toISOString()
   };
 
-  localStorage.setItem('sasiCurrentOffer', JSON.stringify(offer));
+  localStorage.setItem('sasiCurrentOffer', JSON.stringify(localOffer));
   document.getElementById('offerSyncStatus').textContent = '⏳ Syncing to Supabase...';
 
+  const offerData = {
+    title,
+    description: desc,
+    offer_price: parseFloat(price),
+    old_price: parseFloat(oldPrice),
+    stock_remaining: parseInt(stock) || 0,
+    image,
+    is_active: active,
+    discount_percent: Math.round((1 - price / oldPrice) * 100),
+    expires_at: expiry ? new Date(expiry).toISOString() : new Date(Date.now() + 86400000).toISOString()
+  };
+
   try {
-    const { data, error } = await supabaseFetch('offers?is_active=eq.true&limit=1');
+    const { data, error } = await supabaseFetch('offers?is_active=eq.true&limit=1&order=created_at.desc');
     if (data && data.length > 0) {
-      await supabaseFetch(`offers?id=eq.${data[0].id}`, { method: 'PATCH', body: JSON.stringify(offer) });
+      await supabaseFetch(`offers?id=eq.${data[0].id}`, { method: 'PATCH', body: JSON.stringify(offerData) });
     } else {
-      await supabaseFetch('offers', { method: 'POST', body: JSON.stringify({ ...offer, is_active: true }) });
+      await supabaseFetch('offers', { method: 'POST', body: JSON.stringify(offerData) });
     }
     document.getElementById('offerSyncStatus').textContent = '✅ Synced to Supabase! Homepage will show this deal.';
   } catch(e) {
@@ -558,9 +570,22 @@ function previewDeal() {
 
 async function loadActiveOffer() {
   try {
-    const { data } = await supabaseFetch('offers?is_active=eq.true&limit=1&order=updatedAt.desc');
+    const { data } = await supabaseFetch('offers?is_active=eq.true&limit=1&order=created_at.desc');
     if (data && data.length > 0) {
-      localStorage.setItem('sasiCurrentOffer', JSON.stringify(data[0]));
+      const db = data[0];
+      const mapped = {
+        title: db.title,
+        desc: db.description || '',
+        price: db.offer_price || '',
+        oldPrice: db.old_price || '',
+        stock: db.stock_remaining || '',
+        image: db.image || '',
+        active: db.is_active,
+        discount: db.discount_percent ? db.discount_percent + '%' : '',
+        expiry: db.expires_at || '',
+        updatedAt: db.created_at || ''
+      };
+      localStorage.setItem('sasiCurrentOffer', JSON.stringify(mapped));
     }
   } catch(e) { /* ignore */ }
   const saved = JSON.parse(localStorage.getItem('sasiCurrentOffer') || '{}');

@@ -1086,11 +1086,11 @@ function loadTodaysDeal() {
   const saved = JSON.parse(localStorage.getItem('sasiCurrentOffer') || '{}');
   if (saved.title) {
     document.getElementById('dealTitle').textContent = saved.title;
-    document.getElementById('dealDesc').textContent = saved.desc || 'Special offer on personalized gifts. Grab it fast!';
-    document.getElementById('dealPrice').innerHTML = '&#8377;' + (parseInt(saved.price) || 899).toLocaleString();
-    document.getElementById('dealOldPrice').innerHTML = '&#8377;' + (parseInt(saved.oldPrice) || 1499).toLocaleString();
+    document.getElementById('dealDesc').textContent = saved.desc || saved.description || 'Special offer on personalized gifts. Grab it fast!';
+    document.getElementById('dealPrice').innerHTML = '&#8377;' + (parseInt(saved.price || saved.offer_price) || 899).toLocaleString();
+    document.getElementById('dealOldPrice').innerHTML = '&#8377;' + (parseInt(saved.oldPrice || saved.old_price) || 1499).toLocaleString();
     if (saved.image) document.getElementById('dealImage').src = saved.image;
-    const stock = parseInt(saved.stock) || 12;
+    const stock = parseInt(saved.stock || saved.stock_remaining) || 12;
     const pct = Math.min(100, Math.round((stock / 50) * 100));
     document.getElementById('stockFill').style.width = pct + '%';
     document.getElementById('stockText').textContent = '🔥 Only ' + stock + ' items left! Selling fast.';
@@ -1235,7 +1235,20 @@ async function loadOfferFromSupabase() {
   try {
     const { data } = await supabaseFetch('offers?is_active=eq.true&limit=1&order=created_at.desc');
     if (data && data.length > 0) {
-      localStorage.setItem('sasiCurrentOffer', JSON.stringify(data[0]));
+      const db = data[0];
+      const mapped = {
+        title: db.title,
+        desc: db.description || '',
+        price: db.offer_price || '',
+        oldPrice: db.old_price || '',
+        stock: db.stock_remaining || '',
+        image: db.image || '',
+        active: db.is_active,
+        discount: db.discount_percent ? db.discount_percent + '%' : '',
+        expiry: db.expires_at || '',
+        updatedAt: db.created_at || ''
+      };
+      localStorage.setItem('sasiCurrentOffer', JSON.stringify(mapped));
       loadTodaysDeal();
     }
   } catch(e) { /* use localStorage */ }
@@ -1334,16 +1347,58 @@ function submitDeliveryAndPay(e) {
   const finalTax = allInclusiveCart ? 0 : calcTax(subtotal);
   const total = subtotal + finalTax + finalShipping;
 
-  if (typeof Razorpay !== 'undefined') {
+  if (typeof Razorpay === 'undefined') {
+    showToast('Razorpay not loaded. Please try again.', 'error');
+    return;
+  }
+
+  const apiUrl = window.location.origin + '/api/razorpay-order';
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', amount: total * 100, currency: 'INR' })
+    });
+    const orderData = await res.json();
+    if (!res.ok || !orderData.order_id) {
+      showToast('Payment setup failed. Try again.', 'error');
+      return;
+    }
+
     const options = {
       key: CONFIG.RAZORPAY_KEY_ID,
-      amount: total * 100,
-      currency: 'INR',
+      amount: orderData.amount,
+      currency: orderData.currency,
       name: CONFIG.STORE_NAME,
       description: 'Personalized Gifts',
+      order_id: orderData.order_id,
       handler: async function(response) {
         const orderId = 'ORD-' + Date.now().toString(36).toUpperCase();
         const cartItems = [...state.cart];
+
+        // Verify payment signature via our server
+        try {
+          const verifyRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'verify',
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok || !verifyData.verified) {
+            showToast('Payment verification failed. Contact support.', 'error');
+            return;
+          }
+        } catch(e) {
+          showToast('Payment verification error. Contact support.', 'error');
+          return;
+        }
+
         const order = {
           id: orderId,
           subtotal: subtotal,
@@ -1389,12 +1444,18 @@ function submitDeliveryAndPay(e) {
         // Send email invoice to admin
         try { await sendAdminInvoiceEmail(order, cartItems); } catch(e) { console.warn('Invoice email not sent:', e.message); }
         showToast('🎉 Order placed! ID: ' + orderId + '. We will ship to ' + city + '.');
+      },
+      modal: {
+        ondismiss: function() {
+          showToast('Payment cancelled', 'error');
+        }
       }
     };
     const rzp = new Razorpay(options);
     rzp.open();
-  } else {
-    showToast('Razorpay not loaded. Please try again.', 'error');
+  } catch(e) {
+    showToast('Could not connect to payment server. Please try again.', 'error');
+    console.warn('Razorpay order creation error:', e.message);
   }
 }
 
@@ -1437,7 +1498,7 @@ async function sendAdminInvoiceEmail(order, items) {
     order_date: new Date().toLocaleString('en-IN')
   };
   try {
-    await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, templateParams, CONFIG.EMAILJS_PUBLIC_KEY);
+    await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, templateParams, { publicKey: CONFIG.EMAILJS_PUBLIC_KEY });
     console.log('Invoice email sent to admin');
   } catch(e) {
     console.warn('EmailJS send failed:', e.message);

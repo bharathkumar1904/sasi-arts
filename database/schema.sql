@@ -248,7 +248,11 @@ DROP POLICY IF EXISTS "Public insert" ON anniversary_reminders;
 DROP POLICY IF EXISTS "Admin all" ON products;
 DROP POLICY IF EXISTS "Admin all" ON offers;
 DROP POLICY IF EXISTS "Admin all" ON categories;
+DROP POLICY IF EXISTS "Public select" ON orders;
+DROP POLICY IF EXISTS "Admin select" ON orders;
 DROP POLICY IF EXISTS "Admin update" ON orders;
+DROP POLICY IF EXISTS "Public select" ON order_items;
+DROP POLICY IF EXISTS "Admin select" ON order_items;
 DROP POLICY IF EXISTS "Admin all" ON customers;
 
 -- Public read access for products, categories & offers
@@ -265,11 +269,17 @@ CREATE POLICY "Public insert" ON newsletter_subscribers FOR INSERT WITH CHECK (t
 CREATE POLICY "Public insert" ON birthday_reminders FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public insert" ON anniversary_reminders FOR INSERT WITH CHECK (true);
 
+-- Public select for order tracking by customers
+CREATE POLICY "Public select" ON orders FOR SELECT USING (true);
+CREATE POLICY "Public select" ON order_items FOR SELECT USING (true);
+
 -- Admin-only policies (require Supabase Auth login)
 CREATE POLICY "Admin all" ON products FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin all" ON offers FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin all" ON categories FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Admin select" ON orders FOR SELECT USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin update" ON orders FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Admin select" ON order_items FOR SELECT USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin all" ON customers FOR ALL USING (auth.role() = 'authenticated');
 
 -- ============================================================
