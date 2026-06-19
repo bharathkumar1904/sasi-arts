@@ -131,13 +131,27 @@ function renderTab(tab) {
 }
 
 // ===== DASHBOARD =====
-function renderDashboard() {
-  const orders = getOrders();
+async function renderDashboard() {
+  // Load orders from Supabase first if not already loaded
+  if (allOrders.length === 0) {
+    try {
+      const dbOrders = await loadOrdersFromDB();
+      const withItems = await Promise.all((dbOrders || []).map(async (o) => {
+        try { const { data: items } = await supabaseFetch(`order_items?order_id=eq.${o.id}`); return { ...o, items: items || [] }; } catch(e) { return { ...o, items: [] }; }
+      }));
+      allOrders = [...withItems];
+      const local = getOrders();
+      local.forEach(lo => { if (!allOrders.find(mo => mo.id === lo.id)) allOrders.push(lo); });
+      localStorage.setItem('sasiOrders', JSON.stringify(allOrders));
+    } catch(e) { /* use local */ }
+  }
+  const orders = allOrders.length ? allOrders : getOrders();
   const leads = getLeads();
   const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const thisMonthRevenue = orders.filter(o => new Date(o.created_at || o.date) > new Date(Date.now() - 30*86400000)).reduce((sum, o) => sum + (o.total || 0), 0);
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card"><div class="icon"><i class="fas fa-shopping-cart"></i></div><div class="label">Total Orders</div><div class="value">${orders.length}</div><div class="change up">+${orders.filter(o => o.status >= 4).length} completed</div></div>
-    <div class="stat-card"><div class="icon"><i class="fas fa-rupee-sign"></i></div><div class="label">Total Revenue</div><div class="value">&#8377;${revenue.toLocaleString()}</div><div class="change up">+&#8377;${(revenue * 0.15).toFixed(0)} this month</div></div>
+    <div class="stat-card"><div class="icon"><i class="fas fa-rupee-sign"></i></div><div class="label">Total Revenue</div><div class="value">&#8377;${revenue.toLocaleString()}</div><div class="change up">+&#8377;${thisMonthRevenue.toFixed(0)} this month</div></div>
     <div class="stat-card"><div class="icon"><i class="fas fa-users"></i></div><div class="label">Total Leads</div><div class="value">${leads.length}</div><div class="change up">+${leads.filter(l => new Date(l.created_at || l.date) > new Date(Date.now() - 7*86400000)).length} this week</div></div>
     <div class="stat-card"><div class="icon"><i class="fas fa-box"></i></div><div class="label">Products</div><div class="value">${adminProducts.length}</div><div class="change up">${adminProducts.filter(p => p.bestSeller).length} best sellers</div></div>
     <div class="stat-card"><div class="icon"><i class="fas fa-star"></i></div><div class="label">Avg Rating</div><div class="value">4.7</div><div class="change up">&#9733; Excellent</div></div>
@@ -154,7 +168,7 @@ function renderDashboard() {
     </tr>
   `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--gray-600);">No orders yet</td></tr>';
   document.getElementById('topProducts').innerHTML = adminProducts.slice(0, 5).map(p => `
-    <tr><td>${p.name}</td><td>${p.category}</td><td>&#8377;${p.price}</td><td>${'★'.repeat(Math.floor(p.rating))}</td><td>${p.reviews || 0} sold</td></tr>
+    <tr><td>${p.name}</td><td>${p.category}</td><td>&#8377;${p.price}</td><td>${'★'.repeat(Math.floor(p.rating))}</td><td>${p.reviews || 0} reviews</td></tr>
   `).join('');
 }
 
@@ -268,7 +282,13 @@ async function deleteProduct(id) {
   adminProducts = adminProducts.filter(x => x.id !== id);
   localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
   renderProducts();
-  const dbId = p?.db_id || id;
+  // Use the actual Supabase db_id if available (it's a bigint, not a timestamp)
+  let dbId = p?.db_id;
+  if (!dbId) {
+    // Try to find by name as fallback (local-only products won't have db_id)
+    console.warn('No db_id for this product — it may not exist in Supabase');
+    return;
+  }
   try { const r = await deleteProductFromDB(dbId); if (r.error) console.error('Supabase delete error:', r.error); } catch(e) { console.warn('Deleted locally, Supabase sync skipped:', e.message); }
 }
 
@@ -279,10 +299,23 @@ async function loadOrders() {
   const local = getOrders();
   try {
     const dbOrders = await loadOrdersFromDB();
-    const merged = [...dbOrders];
-    local.forEach(lo => { if (!merged.find(mo => mo.id === lo.id)) merged.push(lo); });
+    // Fetch items for each DB order
+    const withItems = await Promise.all((dbOrders || []).map(async (o) => {
+      try {
+        const { data: items } = await supabaseFetch(`order_items?order_id=eq.${o.id}`);
+        return { ...o, items: items || [] };
+      } catch(e) {
+        return { ...o, items: [] };
+      }
+    }));
+    // Merge DB orders (primary) with local orders (fallback)
+    const merged = [...withItems];
+    local.forEach(lo => {
+      if (!merged.find(mo => mo.id === lo.id)) merged.push(lo);
+    });
     allOrders = merged;
   } catch(e) {
+    console.warn('Supabase orders unavailable, using local:', e.message);
     allOrders = local;
   }
   localStorage.setItem('sasiOrders', JSON.stringify(allOrders));
@@ -290,6 +323,7 @@ async function loadOrders() {
 }
 
 async function renderOrders() {
+  document.getElementById('orderTable').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;">Loading orders...</td></tr>';
   await loadOrders();
 }
 

@@ -49,7 +49,7 @@ async function supabaseFetch(path, options = {}) {
 
 // ===== PRODUCTS =====
 async function loadProductsFromDB() {
-  const { data, error } = await supabaseFetch('products?select=*&is_active=eq.true&order=created_at.desc');
+  const { data, error } = await supabaseFetch('products?select=*&order=created_at.desc');
   if (data && data.length > 0) return data;
   return null;
 }
@@ -104,6 +104,31 @@ async function saveOrderItemsToDB(items) {
 async function loadOrdersFromDB() {
   const { data } = await supabaseFetch('orders?select=*&order=created_at.desc');
   return data || [];
+}
+
+async function saveOrderWithItems(order, items) {
+  const orderResult = await supabaseFetch('orders', {
+    method: 'POST',
+    body: JSON.stringify(order)
+  });
+  if (orderResult.error) throw new Error('saveOrderWithItems - order: ' + orderResult.error);
+  if (items && items.length > 0) {
+    const itemsResult = await supabaseFetch('order_items', {
+      method: 'POST',
+      body: JSON.stringify(items)
+    });
+    if (itemsResult.error) console.warn('Order items save warning:', itemsResult.error);
+  }
+  return orderResult;
+}
+
+async function loadOrderWithItems(orderId) {
+  const { data: order } = await supabaseFetch(`orders?id=eq.${orderId}&limit=1`);
+  if (order && order.length > 0) {
+    const { data: items } = await supabaseFetch(`order_items?order_id=eq.${orderId}`);
+    return { ...order[0], items: items || [] };
+  }
+  return null;
 }
 
 // ===== UPDATE ORDER STATUS =====

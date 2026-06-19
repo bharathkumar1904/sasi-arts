@@ -71,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ...p,
         oldPrice: p.old_price || p.oldPrice,
         reviews: p.reviews_count || p.reviews || 0,
-        bestSeller: p.is_best_seller === true || p.bestSeller === true
+        bestSeller: p.is_best_seller === true || p.bestSeller === true,
+        is_active: p.is_active !== false
       }));
       // Keep local products not in DB (e.g. fallback samples) and merge DB ones
       const localMap = new Map(PRODUCTS.map(p => [p.id, p]));
@@ -79,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const existing = localMap.get(p.id);
         // Preserve local bestSeller flag (admin may have toggled it) and local customizations
         if (existing) {
-          localMap.set(p.id, { ...p, bestSeller: existing.bestSeller, is_best_seller: existing.is_best_seller });
+          localMap.set(p.id, { ...p, bestSeller: existing.bestSeller, is_best_seller: existing.is_best_seller, is_active: existing.is_active !== false });
         } else {
           localMap.set(p.id, p);
         }
@@ -165,7 +166,8 @@ function renderShopProducts(products, category) {
 function renderProductCard(p) {
   const inWishlist = state.wishlist.includes(p.id);
   const badges = p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'best' ? '⭐ Best Seller' : p.badge === 'sale' ? '🔥 Sale' : '🆕 New'}</span>` : '';
-  const discount = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+  const pOld = p.oldPrice && p.oldPrice > 0 ? p.oldPrice : 0;
+  const discount = pOld ? Math.round((1 - p.price / pOld) * 100) : 0;
   const allInclusive = p.allInclusive ? '<span style="font-size:11px;display:block;color:#22C55E;font-weight:500;">✅ All inclusive (GST + shipping)</span>' : '';
   const priceDisplay = p.whatsappOnly ? '<span style="font-size:13px;color:var(--gray-500);">Contact for price</span>' :
     `<span class="current">&#8377;${Number(p.price).toLocaleString()}</span>${allInclusive}`;
@@ -334,7 +336,7 @@ function renderCategories() {
 function renderHomepageProducts() {
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
-  let bestSellers = PRODUCTS.filter(p => p.bestSeller).slice(0, 8);
+  let bestSellers = PRODUCTS.filter(p => p.bestSeller || p.is_best_seller).slice(0, 8);
   // If no bestsellers flagged, show top-rated products instead
   if (bestSellers.length === 0) {
     bestSellers = [...PRODUCTS].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 8);
@@ -346,9 +348,10 @@ function renderHomepageProducts() {
   grid.innerHTML = bestSellers.map(p => {
     const inWishlist = state.wishlist.includes(p.id);
     const badges = p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'best' ? '⭐ Best Seller' : p.badge === 'sale' ? '🔥 Sale' : '🆕 New'}</span>` : '';
-    const discount = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+    const pOld = p.oldPrice && p.oldPrice > 0 ? p.oldPrice : 0;
+    const discount = pOld ? Math.round((1 - p.price / pOld) * 100) : 0;
     const priceStr = Number(p.price).toLocaleString();
-    const oldPriceStr = p.oldPrice ? Number(p.oldPrice).toLocaleString() : '';
+    const oldPriceStr = pOld ? Number(pOld).toLocaleString() : '';
     return `
       <div class="product-card animate-on-scroll">
         <div class="image">
@@ -753,31 +756,43 @@ function checkoutViaWhatsApp() {
   window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// ===== DELIVERY CHARGE CALCULATION (DTDC retail rates from Rajahmundry) =====
-// Based on actual DTDC rate card 2025-2026 for <500g parcels from Rajahmundry, AP
-// Source: DTDC official rate calculator + industry rate cards
-function calculateDeliveryCharge(pincode) {
-  if (!pincode || pincode.length < 6) return { charge: 100, note: 'Enter pincode for exact rate' };
-  const pin = parseInt(pincode);
+// ===== DELIVERY CHARGE CALCULATION =====
+async function calculateDeliveryCharge(pincode) {
+  if (!pincode || pincode.length < 6) return { charge: 0, note: 'Enter pincode for exact rate' };
+  const dest = parseInt(pincode);
+  const apiUrl = window.location.origin + '/api/shipping';
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ destination_pincode: dest })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.charge !== undefined) return { charge: data.charge, note: data.note || 'Standard delivery' };
+    }
+  } catch(e) {
+    console.warn('Shipping API unavailable, using local calc:', e.message);
+  }
   const localPincodes = [533101, 533102, 533103, 533104, 533105, 533106, 533107, 533108, 533109, 533110, 533294, 533295, 533296];
-  if (localPincodes.includes(pin)) return { charge: 50, note: 'Local delivery (Rajanagaram area)' };
-  if (pin >= 533000 && pin <= 534999) return { charge: 100, note: 'East Godavari district' };
-  if (pin >= 530000 && pin <= 539999) return { charge: 120, note: 'Andhra Pradesh (nearby)' };
-  if (pin >= 500000 && pin <= 519999) return { charge: 150, note: 'Telangana / Rayalaseema' };
-  if (pin >= 560000 && pin <= 569999) return { charge: 200, note: 'Karnataka (Bengaluru)' };
-  if (pin >= 600000 && pin <= 649999) return { charge: 220, note: 'Tamil Nadu (Chennai)' };
-  if (pin >= 670000 && pin <= 699999) return { charge: 220, note: 'Kerala' };
-  if (pin >= 700000 && pin <= 749999) return { charge: 250, note: 'West Bengal (Kolkata)' };
-  if (pin >= 750000 && pin <= 779999) return { charge: 250, note: 'Odisha' };
-  if (pin >= 380000 && pin <= 399999) return { charge: 250, note: 'Gujarat' };
-  if (pin >= 400000 && pin <= 449999) return { charge: 250, note: 'Maharashtra (Mumbai/Pune)' };
-  if (pin >= 300000 && pin <= 349999) return { charge: 250, note: 'Rajasthan' };
-  if (pin >= 100000 && pin <= 199999) return { charge: 250, note: 'North India (Delhi NCR)' };
-  if (pin >= 200000 && pin <= 299999) return { charge: 250, note: 'Uttar Pradesh / North' };
-  if (pin >= 800000 && pin <= 859999) return { charge: 250, note: 'Bihar' };
-  if (pin >= 780000 && pin <= 799999) return { charge: 250, note: 'Assam / North-East' };
-  if (pin >= 900000 && pin <= 999999) return { charge: 250, note: 'North-East / Remote' };
-  return { charge: 100, note: 'Standard DTDC delivery' };
+  if (localPincodes.includes(dest)) return { charge: 50, note: 'Local delivery (Rajanagaram area)' };
+  if (dest >= 533000 && dest <= 534999) return { charge: 100, note: 'East Godavari district' };
+  if (dest >= 530000 && dest <= 539999) return { charge: 120, note: 'Andhra Pradesh nearby' };
+  if (dest >= 500000 && dest <= 519999) return { charge: 150, note: 'Telangana / Rayalaseema' };
+  if (dest >= 560000 && dest <= 569999) return { charge: 200, note: 'Karnataka' };
+  if (dest >= 600000 && dest <= 649999) return { charge: 220, note: 'Tamil Nadu' };
+  if (dest >= 670000 && dest <= 699999) return { charge: 220, note: 'Kerala' };
+  if (dest >= 700000 && dest <= 749999) return { charge: 250, note: 'West Bengal' };
+  if (dest >= 750000 && dest <= 779999) return { charge: 250, note: 'Odisha' };
+  if (dest >= 380000 && dest <= 399999) return { charge: 250, note: 'Gujarat' };
+  if (dest >= 400000 && dest <= 449999) return { charge: 250, note: 'Maharashtra' };
+  if (dest >= 300000 && dest <= 349999) return { charge: 250, note: 'Rajasthan' };
+  if (dest >= 100000 && dest <= 199999) return { charge: 250, note: 'North India - Delhi NCR' };
+  if (dest >= 200000 && dest <= 299999) return { charge: 250, note: 'Uttar Pradesh / North' };
+  if (dest >= 800000 && dest <= 859999) return { charge: 250, note: 'Bihar' };
+  if (dest >= 780000 && dest <= 799999) return { charge: 250, note: 'Assam / North-East' };
+  if (dest >= 900000 && dest <= 999999) return { charge: 250, note: 'North-East / Remote' };
+  return { charge: 100, note: 'Standard delivery' };
 }
 
 // ===== RECENTLY VIEWED =====
@@ -1277,7 +1292,7 @@ function openDeliveryForm() {
     document.getElementById('delTaxDisplay').textContent = `₹${tax.toLocaleString()}`;
   }
   const delPincode = document.getElementById('delPincode');
-  if (delPincode && !allInclusiveCart) updateDeliveryCharge(delPincode.value);
+  if (delPincode && !allInclusiveCart) { updateDeliveryCharge(delPincode.value); }
   if (allInclusiveCart) {
     const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
     document.getElementById('grandTotalDisplay').textContent = `₹${subtotal.toLocaleString()}`;
@@ -1293,9 +1308,13 @@ function calcTax(subtotal) {
   return CONFIG.TAX_AMOUNT;
 }
 
-function updateDeliveryCharge(pincode) {
+function handlePincodeInput(value) {
+  updateDeliveryCharge(value);
+}
+
+async function updateDeliveryCharge(pincode) {
   const allInclusiveCart = state.cart.every(i => i.allInclusive);
-  const result = calculateDeliveryCharge(pincode);
+  const result = await calculateDeliveryCharge(pincode);
   if (allInclusiveCart) {
     document.getElementById('delChargeDisplay').textContent = '₹0 (All inclusive)';
     document.getElementById('delChargeNote').textContent = 'Included in ₹1,500';
@@ -1406,7 +1425,24 @@ async function submitDeliveryAndPay(e) {
           pincode: pincode,
           created_at: new Date().toISOString()
         };
-        // Save locally (include items for local display)
+        const orderItems = cartItems.map(item => ({
+          order_id: orderId,
+          product_name: item.name,
+          product_price: item.price,
+          quantity: item.qty || 1,
+          customization: item.customization ? JSON.stringify(item.customization) : null,
+          image: item.image || ''
+        }));
+        // Save to Supabase first (with items together)
+        try {
+          await saveOrderWithItems(order, orderItems);
+        } catch(e) {
+          console.warn('Supabase order save failed, saving locally:', e.message);
+          // Fallback: save order and items separately
+          try { await saveOrderToDB(order); } catch(e2) { console.warn('Order fallback failed:', e2.message); }
+          try { await saveOrderItemsToDB(orderItems); } catch(e2) { console.warn('Items fallback failed:', e2.message); }
+        }
+        // Save locally for redundancy
         const localOrder = { ...order, items: cartItems };
         state.orders.push(localOrder);
         saveState('orders');
@@ -1415,20 +1451,6 @@ async function submitDeliveryAndPay(e) {
         updateCartUI();
         closeCart();
         closeDeliveryForm();
-        // Save to Supabase (without items array — items saved separately)
-        try { await saveOrderToDB(order); } catch(e) { console.warn('Order saved locally only:', e.message); }
-        // Save order items to Supabase
-        try {
-          const orderItems = cartItems.map(item => ({
-            order_id: orderId,
-            product_name: item.name,
-            product_price: item.price,
-            quantity: item.qty || 1,
-            customization: item.customization ? JSON.stringify(item.customization) : null,
-            image: item.image || ''
-          }));
-          await saveOrderItemsToDB(orderItems);
-        } catch(e) { console.warn('Order items saved locally only:', e.message); }
         // Send email invoice to admin
         try { await sendAdminInvoiceEmail(order, cartItems); } catch(e) { console.warn('Invoice email not sent:', e.message); }
         showToast('🎉 Order placed! ID: ' + orderId + '. We will ship to ' + city + '.');
@@ -1571,10 +1593,10 @@ function promptAdminPassword() {
 }
 
 // ===== MOBILE MENU =====
-//function toggleMobileMenu() {
-  //document.getElementById('mainNav').classList.toggle('open');
-  //document.getElementById('navOverlay').classList.toggle('active');
-//}
+function toggleMobileMenu() {
+  document.getElementById('mainNav').classList.toggle('open');
+  document.getElementById('navOverlay').classList.toggle('active');
+}
 
 // ===== HEADER SCROLL (debounced) =====
 let scrollTimeout;

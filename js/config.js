@@ -16,12 +16,13 @@ const CONFIG = {
   RAZORPAY_KEY_ID: 'rzp_test_T3Uhx69q0zfD2n',
   SITE_URL: 'https://sasiarts.in',
   CURRENCY: '₹',
-  FREE_SHIPPING_ABOVE: 0,
-  SHIPPING_CHARGE: 0,
+  FREE_SHIPPING_ABOVE: 499,
+  SHIPPING_CHARGE: 50,
   TAX_AMOUNT: 23.33,
   DELIVERY_ESTIMATE: '3-5 business days',
-  BASE_LOCATION: 'Rajahmundry',
-  BASE_PINCODE: 533101,
+  BASE_LOCATION: 'Rajanagaram',
+  BASE_PINCODE: 533294,
+  DELHIVERY_API_URL: 'https://track.delhivery.com',
   // ADMIN_PASSWORD_HASH removed — Supabase Auth handles login
   ADMIN_EMAIL: 'sasiarts2018@gmail.com',
   // EmailJS config for invoice emails (sign up free at https://www.emailjs.com)
