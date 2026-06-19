@@ -39,7 +39,7 @@
 
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; }
 body {
   font-family: var(--font-primary);
   font-size: 16px;
@@ -76,6 +76,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 .top-bar a { color: var(--secondary-light); transition: var(--transition); }
 .top-bar a:hover { color: var(--primary); }
@@ -1462,6 +1463,25 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   .countdown .unit { padding: 8px 12px; min-width: 60px; }
   .countdown .unit .value { font-size: 1.2rem; }
   .footer-grid { grid-template-columns: 1fr; }
+  .header .container { gap: 8px; padding: 10px 12px; }
+  .header-actions { gap: 4px; }
+  .header-actions .action-btn { width: 34px; height: 34px; font-size: 15px; }
+  .logo { font-size: 1.2rem; }
+  .top-bar .right { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .top-bar .left { gap: 8px; }
+  .top-bar { font-size: 11px; padding: 6px 0; }
+  .product-card .actions { flex-direction: column; }
+  .product-card .actions .btn { width: 100%; padding: 6px 8px; font-size: 11px; }
+  .hero-actions .btn { padding: 12px 20px; font-size: 14px; width: 100%; justify-content: center; }
+  .tracking-steps { gap: 2px; }
+  .tracking-steps .step .label { font-size: 9px; }
+  .tracking-steps .step .dot { width: 30px; height: 30px; font-size: 11px; }
+  .countdown .unit { min-width: 55px; padding: 6px 10px; }
+  .countdown .unit .value { font-size: 1rem; }
+  #shop-page .shop-products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  #shop-page .shop-topbar { padding: 8px 12px; flex-wrap: wrap; }
+  #shop-page .shop-controls { padding: 10px 12px; }
+  #shop-page .shop-filters select { font-size: 11px; padding: 6px 8px; }
 }
 
 /* ===== MISC UTILITIES ===== */

@@ -24,7 +24,7 @@ const SAMPLE_PRODUCTS = [
 const SAMPLE_GALLERY = [
   { image: 'images/WhatsApp Image 2026-06-19 at 12.55.54 PM.jpeg', caption: 'Birthday gift frame' },
   { image: 'images/WhatsApp Image 2026-06-19 at 12.56.38 PM.jpeg', caption: 'LED frame with couple photo' },
-  { image: 'images/WhatsApp Image 2026-06-19 at 12.55.54 PM.jpeg', caption: 'Acrylic name plate' },
+  { image: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=400', caption: 'Acrylic name plate' },
   { image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', caption: 'Custom moon lamp' },
   { image: 'https://images.unsplash.com/photo-1594498653385-d5172c532c00?w=400', caption: 'Photo clock gift' },
   { image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400', caption: 'Crystal engraved frame' },

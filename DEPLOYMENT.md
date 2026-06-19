@@ -57,7 +57,9 @@ sasi-arts/
 │   ├── app.js          # Main application
 │   └── supabase.js     # Database layer
 ├── database/
-│   └── schema.sql      # Database schema
+│   ├── schema.sql      # Database schema
+│   └── storage.sql     # Storage bucket setup
+├── images/             # Gallery images
 └── DEPLOYMENT.md       # This file
 ```
 
