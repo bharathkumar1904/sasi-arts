@@ -1325,7 +1325,7 @@ function updateDeliveryCharge(pincode) {
   document.getElementById('delTaxDisplay').textContent = allInclusiveCart ? '₹0 (Included)' : `₹${finalTax.toLocaleString()}`;
 }
 
-function submitDeliveryAndPay(e) {
+async function submitDeliveryAndPay(e) {
   e.preventDefault();
   const name = document.getElementById('delName').value.trim();
   const phone = document.getElementById('delPhone').value.trim();
