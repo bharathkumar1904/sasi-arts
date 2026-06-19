@@ -757,39 +757,27 @@ function checkoutViaWhatsApp() {
 // Based on actual DTDC rate card 2025-2026 for <500g parcels from Rajahmundry, AP
 // Source: DTDC official rate calculator + industry rate cards
 function calculateDeliveryCharge(pincode) {
-  if (!pincode || pincode.length < 6) return { charge: 250, note: 'Enter pincode for exact rate' };
+  if (!pincode || pincode.length < 6) return { charge: 100, note: 'Enter pincode for exact rate' };
   const pin = parseInt(pincode);
-  const firstDigit = Math.floor(pin / 100000);
-  const first3 = Math.floor(pin / 1000);
-  if (pin >= 533101 && pin <= 533110) return { charge: 50, note: 'Local (<10km from Rajahmundry)' };
-  if (pin >= 533000 && pin <= 534999) return { charge: 80, note: 'Rajahmundry area (East Godavari)' };
+  const localPincodes = [533101, 533102, 533103, 533104, 533105, 533106, 533107, 533108, 533109, 533110, 533294, 533295, 533296];
+  if (localPincodes.includes(pin)) return { charge: 50, note: 'Local delivery (Rajanagaram area)' };
+  if (pin >= 533000 && pin <= 534999) return { charge: 100, note: 'East Godavari district' };
   if (pin >= 530000 && pin <= 539999) return { charge: 120, note: 'Andhra Pradesh (nearby)' };
-  if (first3 >= 500 && first3 <= 509) return { charge: 150, note: 'Telangana (Hyderabad)' };
-  if (first3 >= 515 && first3 <= 518) return { charge: 150, note: 'Andhra Pradesh (Kadapa/Kurnool)' };
-  if (first3 >= 520 && first3 <= 535) return { charge: 130, note: 'Coastal Andhra' };
-  if (first3 >= 560 && first3 <= 564) return { charge: 200, note: 'Karnataka (Bengaluru)' };
-  if (first3 >= 600 && first3 <= 643) return { charge: 220, note: 'Tamil Nadu (Chennai)' };
-  if (first3 >= 670 && first3 <= 695) return { charge: 250, note: 'Kerala' };
-  if (first3 >= 700 && first3 <= 743) return { charge: 280, note: 'West Bengal (Kolkata)' };
-  if (first3 >= 751 && first3 <= 770) return { charge: 250, note: 'Odisha' };
-  if (first3 >= 380 && first3 <= 396) return { charge: 280, note: 'Gujarat (Ahmedabad)' };
-  if (first3 >= 400 && first3 <= 445) return { charge: 300, note: 'Maharashtra (Mumbai/Pune)' };
-  if (first3 >= 302 && first3 <= 345) return { charge: 300, note: 'Rajasthan' };
-  if (first3 >= 110 && first3 <= 113) return { charge: 350, note: 'Delhi NCR' };
-  if (first3 >= 201 && first3 <= 285) return { charge: 320, note: 'Uttar Pradesh' };
-  if (first3 >= 800 && first3 <= 855) return { charge: 320, note: 'Bihar' };
-  if (first3 >= 781 && first3 <= 788) return { charge: 350, note: 'Assam' };
-  if (first3 >= 790 && first3 <= 799) return { charge: 400, note: 'North-East India' };
-  if (first3 >= 900 && first3 <= 999) return { charge: 400, note: 'North-East/Remote' };
-  if (firstDigit === 1) return { charge: 350, note: 'North India' };
-  if (firstDigit === 2) return { charge: 320, note: 'North India' };
-  if (firstDigit === 3) return { charge: 280, note: 'West India' };
-  if (firstDigit === 4) return { charge: 300, note: 'Central India' };
-  if (firstDigit === 5) return { charge: 200, note: 'South India' };
-  if (firstDigit === 6) return { charge: 250, note: 'South India' };
-  if (firstDigit === 7) return { charge: 280, note: 'East India' };
-  if (firstDigit === 8) return { charge: 350, note: 'East/North-East India' };
-  return { charge: 250, note: 'Standard DTDC delivery' };
+  if (pin >= 500000 && pin <= 519999) return { charge: 150, note: 'Telangana / Rayalaseema' };
+  if (pin >= 560000 && pin <= 569999) return { charge: 200, note: 'Karnataka (Bengaluru)' };
+  if (pin >= 600000 && pin <= 649999) return { charge: 220, note: 'Tamil Nadu (Chennai)' };
+  if (pin >= 670000 && pin <= 699999) return { charge: 220, note: 'Kerala' };
+  if (pin >= 700000 && pin <= 749999) return { charge: 250, note: 'West Bengal (Kolkata)' };
+  if (pin >= 750000 && pin <= 779999) return { charge: 250, note: 'Odisha' };
+  if (pin >= 380000 && pin <= 399999) return { charge: 250, note: 'Gujarat' };
+  if (pin >= 400000 && pin <= 449999) return { charge: 250, note: 'Maharashtra (Mumbai/Pune)' };
+  if (pin >= 300000 && pin <= 349999) return { charge: 250, note: 'Rajasthan' };
+  if (pin >= 100000 && pin <= 199999) return { charge: 250, note: 'North India (Delhi NCR)' };
+  if (pin >= 200000 && pin <= 299999) return { charge: 250, note: 'Uttar Pradesh / North' };
+  if (pin >= 800000 && pin <= 859999) return { charge: 250, note: 'Bihar' };
+  if (pin >= 780000 && pin <= 799999) return { charge: 250, note: 'Assam / North-East' };
+  if (pin >= 900000 && pin <= 999999) return { charge: 250, note: 'North-East / Remote' };
+  return { charge: 100, note: 'Standard DTDC delivery' };
 }
 
 // ===== RECENTLY VIEWED =====
@@ -1583,10 +1571,10 @@ function promptAdminPassword() {
 }
 
 // ===== MOBILE MENU =====
-function toggleMobileMenu() {
-  document.getElementById('mainNav').classList.toggle('open');
-  document.getElementById('navOverlay').classList.toggle('active');
-}
+//function toggleMobileMenu() {
+  //document.getElementById('mainNav').classList.toggle('open');
+  //document.getElementById('navOverlay').classList.toggle('active');
+//}
 
 // ===== HEADER SCROLL (debounced) =====
 let scrollTimeout;

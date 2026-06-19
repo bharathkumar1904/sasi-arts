@@ -204,7 +204,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 @media (max-width: 767px) { .menu-toggle { display: block; } }
 
 /* ===== NAVIGATION ===== */
-.main-nav { background: var(--light); border-bottom: 1px solid var(--gray-200); }
+.main-nav { display: none; }
 .main-nav .container { padding: 0 20px; }
 .main-nav ul {
   display: flex;
@@ -243,6 +243,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 /* Mobile Nav */
 @media (max-width: 767px) {
   .main-nav {
+    display: block;
     position: fixed;
     top: 0;
     left: -100%;
