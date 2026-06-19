@@ -760,13 +760,9 @@ function checkoutViaWhatsApp() {
 async function calculateDeliveryCharge(pincode) {
   if (!pincode || pincode.length < 6) return { charge: 0, note: 'Enter pincode for exact rate' };
   const dest = parseInt(pincode);
-  const apiUrl = window.location.origin + '/api/shipping';
+  const bodyObj = { destination_pincode: dest };
   try {
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ destination_pincode: dest })
-    });
+    const res = await fetchApi('/api/shipping', bodyObj);
     if (res.ok) {
       const data = await res.json();
       if (data.charge !== undefined) return { charge: data.charge, note: data.note || 'Standard delivery' };
@@ -1206,13 +1202,55 @@ async function trackOrder() {
   }
 }
 
+// ===== API HELPER =====
+function getApiBaseUrl() {
+  const loc = window.location;
+  if (!loc.origin || loc.origin === 'null' || loc.hostname === '' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1') {
+    return CONFIG.API_BASE_URL;
+  }
+  return loc.origin;
+}
+async function fetchApi(endpoint, body, retried) {
+  const url = getApiBaseUrl() + endpoint;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res;
+  } catch(e) {
+    if (!retried && getApiBaseUrl() !== CONFIG.API_BASE_URL) {
+      const fallbackUrl = CONFIG.API_BASE_URL + endpoint;
+      const res = await fetch(fallbackUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return res;
+    }
+    throw e;
+  }
+}
+
 // ===== QR CODES =====
 function generateQRs() {
-  try {
-    new QRCode(document.getElementById('qrWebsite'), { text: CONFIG.SITE_URL, width: 150, height: 150 });
-    new QRCode(document.getElementById('qrWhatsApp'), { text: CONFIG.WHATSAPP_LINK, width: 150, height: 150 });
-    new QRCode(document.getElementById('qrCatalog'), { text: CONFIG.SITE_URL, width: 150, height: 150 });
-  } catch(e) { /* QR library may not load */ }
+  ['qrWebsite', 'qrWhatsApp', 'qrCatalog'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const text = id === 'qrWhatsApp' ? CONFIG.WHATSAPP_LINK : CONFIG.SITE_URL;
+    el.innerHTML = '';
+    const canvas = document.createElement('canvas');
+    canvas.width = 150; canvas.height = 150;
+    canvas.style.width = '150px';
+    canvas.style.height = '150px';
+    el.appendChild(canvas);
+    if (typeof QRCode !== 'undefined') {
+      QRCode.toCanvas(canvas, text, { width: 150 }, function(err) {
+        if (err) console.warn('QR error for', id, err);
+      });
+    }
+  });
 }
 function downloadQR(type) {
   const el = document.getElementById(type === 'website' ? 'qrWebsite' : type === 'whatsapp' ? 'qrWhatsApp' : 'qrCatalog');
@@ -1359,14 +1397,8 @@ async function submitDeliveryAndPay(e) {
     return;
   }
 
-  const apiUrl = window.location.origin + '/api/razorpay-order';
-
   try {
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', amount: total * 100, currency: 'INR' })
-    });
+    const res = await fetchApi('/api/razorpay-order', { action: 'create', amount: total * 100, currency: 'INR' });
     const orderData = await res.json();
     if (!res.ok || !orderData.order_id) {
       showToast('Payment setup failed. Try again.', 'error');
@@ -1386,15 +1418,11 @@ async function submitDeliveryAndPay(e) {
 
         // Verify payment signature via our server
         try {
-          const verifyRes = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'verify',
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            })
+          const verifyRes = await fetchApi('/api/razorpay-order', {
+            action: 'verify',
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
           });
           const verifyData = await verifyRes.json();
           if (!verifyRes.ok || !verifyData.verified) {

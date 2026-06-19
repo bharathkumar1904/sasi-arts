@@ -282,10 +282,9 @@ async function deleteProduct(id) {
   adminProducts = adminProducts.filter(x => x.id !== id);
   localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
   renderProducts();
-  // Use the actual Supabase db_id if available (it's a bigint, not a timestamp)
-  let dbId = p?.db_id;
-  if (!dbId) {
-    // Try to find by name as fallback (local-only products won't have db_id)
+  // Use the actual Supabase db_id if available; fallback to id for sample products
+  let dbId = p?.db_id || p?.id;
+  if (!dbId || typeof dbId === 'string' && dbId.length > 10) {
     console.warn('No db_id for this product — it may not exist in Supabase');
     return;
   }
