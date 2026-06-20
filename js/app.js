@@ -1401,8 +1401,9 @@ async function submitDeliveryAndPay(e) {
     const res = await fetchApi('/api/razorpay-order', { action: 'create', amount: total * 100, currency: 'INR' });
     const orderData = await res.json();
     if (!res.ok || !orderData.order_id) {
-      console.error('Razorpay setup failed:', res.status, orderData);
-      showToast('Payment setup failed: ' + (orderData.error || 'Server error'), 'error');
+      const msg = orderData.error || ('HTTP ' + res.status);
+      console.error('Razorpay setup failed:', msg);
+      showToast('Payment setup failed: ' + msg, 'error');
       return;
     }
 
@@ -1493,7 +1494,7 @@ async function submitDeliveryAndPay(e) {
     const rzp = new Razorpay(options);
     rzp.open();
   } catch(e) {
-    showToast('Could not connect to payment server. Please try again.', 'error');
+    showToast('Payment error: ' + e.message, 'error');
     console.warn('Razorpay order creation error:', e.message);
   }
 }
