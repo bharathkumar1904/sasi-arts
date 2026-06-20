@@ -1,12 +1,5 @@
 {
-  "name": "sasi-arts-api",
-  "version": "1.0.0",
-  "description": "Sasi Arts API - Razorpay payments & Delhivery shipping",
-  "main": "razorpay-order.js",
   "dependencies": {
-    "razorpay": "^2.9.6"
-  },
-  "scripts": {
-    "start": "node razorpay-order.js"
+    "razorpay": "^2.9.0"
   }
 }
