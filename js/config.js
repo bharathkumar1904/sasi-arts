@@ -25,7 +25,7 @@ const CONFIG = {
   API_BASE_URL: 'https://sasi-arts.vercel.app', // Change to your actual domain
   DELHIVERY_API_URL: 'https://track.delhivery.com',
   // ADMIN_PASSWORD_HASH removed — Supabase Auth handles login
-  ADMIN_EMAIL: 'sasiarts2018@gmail.com',
+  ADMIN_EMAIL: 'sodasanisasi387@gmail.com',
   // EmailJS config for invoice emails (sign up free at https://www.emailjs.com)
   EMAILJS_SERVICE_ID: 'service_cymxxes',
   EMAILJS_TEMPLATE_ID: 'template_xmrwntr',

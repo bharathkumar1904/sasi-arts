@@ -1,13 +1,9 @@
-const crypto = require('crypto');
+const Razorpay = require('razorpay');
 
-function getAuth() {
-  const key_id = process.env.RAZORPAY_KEY_ID;
-  const key_secret = process.env.RAZORPAY_KEY_SECRET;
-  if (!key_id || !key_secret) {
-    throw new Error('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET not set in Vercel env vars');
-  }
-  return 'Basic ' + Buffer.from(key_id + ':' + key_secret).toString('base64');
-}
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,37 +13,26 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const auth = getAuth();
     const { action, amount, currency, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     switch (action) {
       case 'create': {
-        if (!amount || amount < 100) {
-          return res.status(400).json({ error: 'Amount must be at least 100 paise' });
+        if (!amount || amount <= 0) {
+          return res.status(400).json({ error: 'Invalid amount' });
         }
-        const resp = await fetch('https://api.razorpay.com/v1/orders', {
-          method: 'POST',
-          headers: {
-            'Authorization': auth,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount: Math.round(amount),
-            currency: currency || 'INR',
-            receipt: 'rcpt_' + Date.now(),
-          }),
+        const order = await razorpay.orders.create({
+          amount: Math.round(amount),
+          currency: currency || 'INR',
+          receipt: 'rcpt_' + Date.now(),
         });
-        const data = await resp.json();
-        if (!resp.ok) {
-          return res.status(500).json({ error: 'Razorpay error: ' + (data.error?.description || data.error || resp.status) });
-        }
-        return res.status(200).json({ order_id: data.id, amount: data.amount, currency: data.currency });
+        return res.status(200).json({ order_id: order.id, amount: order.amount, currency: order.currency });
       }
 
       case 'verify': {
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
           return res.status(400).json({ error: 'Missing payment details for verification' });
         }
+        const crypto = require('crypto');
         const expectedSignature = crypto
           .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
           .update(razorpay_order_id + '|' + razorpay_payment_id)
@@ -55,8 +40,9 @@ module.exports = async (req, res) => {
 
         if (expectedSignature === razorpay_signature) {
           return res.status(200).json({ verified: true, payment_id: razorpay_payment_id });
+        } else {
+          return res.status(400).json({ verified: false, error: 'Invalid payment signature' });
         }
-        return res.status(400).json({ verified: false, error: 'Signature mismatch - payment may be tampered' });
       }
 
       default:

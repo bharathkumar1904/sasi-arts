@@ -1,3 +1,5 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "razorpay": "^2.9.0"
+  }
 }
