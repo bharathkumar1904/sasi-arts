@@ -1401,7 +1401,8 @@ async function submitDeliveryAndPay(e) {
     const res = await fetchApi('/api/razorpay-order', { action: 'create', amount: total * 100, currency: 'INR' });
     const orderData = await res.json();
     if (!res.ok || !orderData.order_id) {
-      showToast('Payment setup failed. Try again.', 'error');
+      console.error('Razorpay setup failed:', res.status, orderData);
+      showToast('Payment setup failed: ' + (orderData.error || 'Server error'), 'error');
       return;
     }
 
