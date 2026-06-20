@@ -13,7 +13,7 @@ const CONFIG = {
   SUPABASE_URL: 'https://wbjgiizrfdjhrccgsdbd.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiamdpaXpyZmRqaHJjY2dzZGJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NTY2NTMsImV4cCI6MjA5NzEzMjY1M30.SUVAmTBDvdo4pfGFOWQlMNxOOndgRnTH8N06t0xYbbg',
 
-  RAZORPAY_KEY_ID: 'rzp_test_T3Uhx69q0zfD2n',
+  RAZORPAY_KEY_ID: 'rzp_test_T3pdLKLIci7KKC',
   SITE_URL: 'https://sasiarts.in',
   CURRENCY: '₹',
   FREE_SHIPPING_ABOVE: 499,
