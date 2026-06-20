@@ -1204,11 +1204,7 @@ async function trackOrder() {
 
 // ===== API HELPER =====
 function getApiBaseUrl() {
-  const loc = window.location;
-  if (!loc.origin || loc.origin === 'null' || loc.hostname === '' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1') {
-    return CONFIG.API_BASE_URL;
-  }
-  return loc.origin;
+  return window.location.origin;
 }
 async function fetchApi(endpoint, body, retried) {
   const url = getApiBaseUrl() + endpoint;
