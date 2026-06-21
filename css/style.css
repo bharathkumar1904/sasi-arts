@@ -201,7 +201,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 
 /* Mobile Menu Toggle */
 .menu-toggle { display: none; font-size: 24px; padding: 8px; color: var(--dark); }
-@media (max-width: 767px) { .menu-toggle { display: block; } }
+@media (max-width: 767px) { .menu-toggle { display: block; } .top-bar { display: none; } }
 
 /* ===== NAVIGATION ===== */
 .main-nav { display: none; }

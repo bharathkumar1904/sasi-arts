@@ -1518,6 +1518,7 @@ async function sendAdminInvoiceEmail(order, items) {
   const itemsHtml = items.map(i =>
     `• ${i.name} x${i.qty || 1} = ₹${((i.price || 0) * (i.qty || 1)).toLocaleString()}`
   ).join('\n');
+  const firstItem = items && items.length > 0 ? items[0] : null;
   const templateParams = {
     to_email: CONFIG.ADMIN_EMAIL,
     from_name: 'Sasi Arts Website',
@@ -1535,7 +1536,8 @@ async function sendAdminInvoiceEmail(order, items) {
     tax: '₹' + (order.tax || 0).toLocaleString(),
     total: '₹' + (order.total || 0).toLocaleString(),
     payment_id: order.payment_id || 'N/A',
-    order_date: new Date().toLocaleString('en-IN')
+    order_date: new Date().toLocaleString('en-IN'),
+    image_url: firstItem ? (firstItem.image || firstItem.image_url || '') : ''
   };
   try {
     await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, templateParams, { publicKey: CONFIG.EMAILJS_PUBLIC_KEY });
