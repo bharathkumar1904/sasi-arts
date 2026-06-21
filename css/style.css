@@ -199,23 +199,33 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   justify-content: center;
 }
 
-/* ===== THREE-DOTS DROPDOWN ===== */
-.menu-toggle { display: none; }
+/* ===== HAMBURGER DROPDOWN ===== */
+.menu-toggle {
+  display: none;
+  font-size: 22px;
+  padding: 8px 12px;
+  color: var(--dark);
+  background: none;
+  border: none;
+  cursor: pointer;
+  order: -1;
+}
 @media (max-width: 767px) {
-  .menu-toggle { display: flex; }
+  .menu-toggle { display: block; }
 }
 .dropdown-nav {
   display: none;
   position: absolute;
   top: 100%;
-  right: 12px;
-  width: 220px;
+  left: 0;
+  width: 260px;
   background: var(--light);
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
   z-index: 2000;
   overflow: hidden;
-  margin-top: 4px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 .dropdown-nav.open { display: block; }
 .dropdown-nav ul {

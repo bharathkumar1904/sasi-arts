@@ -47,6 +47,9 @@
           <small class="subtitle">Photo Frames & Gifts</small>
         </div>
       </a>
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+      </button>
       <div class="search-bar" id="searchBar">
         <input type="text" placeholder="Search gifts..." id="searchInput" onkeyup="handleSearch(event)">
         <button onclick="handleSearchClick()"><i class="fas fa-search"></i></button>
@@ -65,15 +68,10 @@
           <i class="fas fa-shopping-bag"></i>
           <span class="badge cart-count" id="cartCount">0</span>
         </button>
-        <button class="action-btn menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu" title="Menu">
-          <i class="fas fa-ellipsis-v"></i>
-        </button>
       </div>
     </div>
-  </header>
-
-  <!-- DROPDOWN NAV (mobile) -->
-  <nav class="dropdown-nav" id="mainNav">
+    <!-- DROPDOWN NAV (mobile) -->
+    <nav class="dropdown-nav" id="mainNav">
     <ul>
       <li><a href="/" class="active">Home</a></li>
       <li><a href="javascript:void(0)" onclick="openShop();toggleMobileMenu()">Shop</a></li>
@@ -86,8 +84,9 @@
       <li><a href="#track-order" onclick="toggleMobileMenu()">Track Order</a></li>
       <li><a href="#corporate" onclick="toggleMobileMenu()">Corporate</a></li>
     </ul>
-  </nav>
-  <div class="dropdown-overlay" id="navOverlay" onclick="toggleMobileMenu()"></div>
+    </nav>
+    <div class="dropdown-overlay" id="navOverlay" onclick="toggleMobileMenu()"></div>
+  </header>
 
   <!-- HERO BANNER -->
   <section class="hero" id="hero">
