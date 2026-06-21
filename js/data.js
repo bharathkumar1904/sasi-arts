@@ -22,16 +22,16 @@ const SAMPLE_PRODUCTS = [
 ];
 
 const SAMPLE_GALLERY = [
-  { image: '/images/WhatsApp Image 2026-06-21 at 12.08.44 PM.jpeg', caption: 'Birthday gift frame' },
-  { image: '/images/71kMbCYxjIL._SL1500_.jpg', caption: 'LED frame with couple photo' },
-  { image: '/images/WhatsApp Image 2026-06-19 at 12.55.54 PM.jpeg', caption: 'Acrylic name plate' },
-  { image: '/images/6133RD4fgqL._SL1024_.jpg', caption: 'Custom moon lamp' },
-  { image: '/images/clock.jpg', caption: 'Photo clock gift' },
-  { image: '/images/WhatsApp Image 2026-06-19 at 12.56.38 PM.jpeg', caption: 'Crystal engraved frame' },
-  { image: '/images/magical-photo-frame-mirror-2-in-1-led-display-frame-with-smart-original-imah6zhqftzzkvtg.webp', caption: 'Magic mirror with name' },
-  { image: '/images/WhatsApp Image 2026-06-21 at 11.53.58 AM.jpeg', caption: 'Custom pencil sketch portrait' },
-  { image: '/images/WhatsApp Image 2026-06-21 at 11.53.11 AM.jpeg', caption: 'Hand-drawn couple sketch' },
-  { image: '/images/WhatsApp Image 2026-06-21 at 12.04.47 PM.jpeg', caption: 'Blood art custom portrait' },
+  { image: 'images/WhatsApp Image 2026-06-21 at 12.08.44 PM.jpeg', caption: 'Birthday gift frame' },
+  { image: 'images/71kMbCYxjIL._SL1500_.jpg', caption: 'LED frame with couple photo' },
+  { image: 'images/WhatsApp Image 2026-06-19 at 12.55.54 PM.jpeg', caption: 'Acrylic name plate' },
+  { image: 'images/6133RD4fgqL._SL1024_.jpg', caption: 'Custom moon lamp' },
+  { image: 'images/clock.jpg', caption: 'Photo clock gift' },
+  { image: 'images/WhatsApp Image 2026-06-19 at 12.56.38 PM.jpeg', caption: 'Crystal engraved frame' },
+  { image: 'images/magical-photo-frame-mirror-2-in-1-led-display-frame-with-smart-original-imah6zhqftzzkvtg.webp', caption: 'Magic mirror with name' },
+  { image: 'images/WhatsApp Image 2026-06-21 at 11.53.58 AM.jpeg', caption: 'Custom pencil sketch portrait' },
+  { image: 'images/WhatsApp Image 2026-06-21 at 11.53.11 AM.jpeg', caption: 'Hand-drawn couple sketch' },
+  { image: 'images/WhatsApp Image 2026-06-21 at 12.04.47 PM.jpeg', caption: 'Blood art custom portrait' },
 ];
 
 const SAMPLE_REVIEWS = [

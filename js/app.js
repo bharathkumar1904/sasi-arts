@@ -290,7 +290,7 @@ function renderArtServices() {
     </div>
     <div class="art-service-card animate-on-scroll">
       <div class="preview">
-        <img src="${bloodArt ? bloodArt.image : 'https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTJ6Orc73YB-ZPR2iOJ8AbFnIemJ3C-qgvEc79K1KjUhRD-ZuSn-Qi6baBTQVKqMTw5FWErjA_67_QvlIpmp_a1bGMeuEHatihpuCLU61zF1de8iVnEB2W12w'}" alt="Blood Art">
+        <img src="${bloodArt ? bloodArt.image : 'images/WhatsApp Image 2026-06-21 at 12.17.46 PM.jpeg'}" alt="Blood Art">
         <span class="overlay-badge blood">🎨 Blood Art</span>
       </div>
       <div class="body">
