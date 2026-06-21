@@ -40,9 +40,7 @@
   <!-- HEADER -->
   <header class="header" id="header">
     <div class="container">
-      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
-        <i class="fas fa-bars"></i>
-      </button>
+    
       <a href="/" class="logo">
         <div>
           Sasi <span>Arts</span>
@@ -67,33 +65,29 @@
           <i class="fas fa-shopping-bag"></i>
           <span class="badge cart-count" id="cartCount">0</span>
         </button>
+        <button class="action-btn menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu" title="Menu">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- MAIN NAV -->
-  <!-- MAIN NAV -->
-  <nav class="main-nav" id="mainNav">
-    <div class="mobile-nav-header">
-      <span style="font-weight:600;">Menu</span>
-      <button onclick="toggleMobileMenu()" style="font-size:20px;">&times;</button>
-    </div>
-    <div class="container">
-      <ul>
-        <li><a href="/" class="active">Home</a></li>
-        <li><a href="javascript:void(0)" onclick="openShop()">Shop</a></li>
-        <li><a href="#best-sellers">Best Sellers</a></li>
-        <li><a href="#product-builder">Customize</a></li>
-        <li><a href="#deals">Today's Deal</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#reviews">Reviews</a></li>
-        <li><a href="javascript:void(0)" onclick="openWhatsAppKart()">WhatsApp Kart</a></li>
-        <li><a href="#track-order">Track Order</a></li>
-        <li><a href="#corporate">Corporate</a></li>
-      </ul>
-    </div>
+  <!-- DROPDOWN NAV (mobile) -->
+  <nav class="dropdown-nav" id="mainNav">
+    <ul>
+      <li><a href="/" class="active">Home</a></li>
+      <li><a href="javascript:void(0)" onclick="openShop();toggleMobileMenu()">Shop</a></li>
+      <li><a href="#best-sellers" onclick="toggleMobileMenu()">Best Sellers</a></li>
+      <li><a href="#product-builder" onclick="toggleMobileMenu()">Customize</a></li>
+      <li><a href="#deals" onclick="toggleMobileMenu()">Today's Deal</a></li>
+      <li><a href="#gallery" onclick="toggleMobileMenu()">Gallery</a></li>
+      <li><a href="#reviews" onclick="toggleMobileMenu()">Reviews</a></li>
+      <li><a href="javascript:void(0)" onclick="openWhatsAppKart();toggleMobileMenu()">WhatsApp Kart</a></li>
+      <li><a href="#track-order" onclick="toggleMobileMenu()">Track Order</a></li>
+      <li><a href="#corporate" onclick="toggleMobileMenu()">Corporate</a></li>
+    </ul>
   </nav>
-  <div class="nav-overlay" id="navOverlay" onclick="toggleMobileMenu()"></div>
+  <div class="dropdown-overlay" id="navOverlay" onclick="toggleMobileMenu()"></div>
 
   <!-- HERO BANNER -->
   <section class="hero" id="hero">

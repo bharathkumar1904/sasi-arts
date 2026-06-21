@@ -1629,6 +1629,19 @@ function toggleMobileMenu() {
   document.getElementById('mainNav').classList.toggle('open');
   document.getElementById('navOverlay').classList.toggle('active');
 }
+// Close dropdown on scroll
+let menuCloseTimeout;
+window.addEventListener('scroll', () => {
+  if (menuCloseTimeout) return;
+  menuCloseTimeout = setTimeout(() => {
+    const nav = document.getElementById('mainNav');
+    if (nav.classList.contains('open')) {
+      nav.classList.remove('open');
+      document.getElementById('navOverlay').classList.remove('active');
+    }
+    menuCloseTimeout = null;
+  }, 100);
+});
 
 // ===== HEADER SCROLL (debounced) =====
 let scrollTimeout;
