@@ -3,7 +3,7 @@ const CONFIG = {
   STORE_TAGLINE: 'Create Memories Through Personalized Gifts',
   STORE_ADDRESS: 'Rajanagaram, Rajahmundry',
   WHATSAPP_NUMBER: '918106545049',
-  WHATSAPP_LINK: 'https://wa.me/918106545049',
+  WHATSAPP_LINK: 'https://wa.me/8106545049',
   WORKING_HOURS: 'Mon-Sat: 9:00 AM - 8:00 PM',
   GOOGLE_RATING: '4.8',
   PRIMARY_COLOR: '#FF6B00',
@@ -13,7 +13,7 @@ const CONFIG = {
   SUPABASE_URL: 'https://wbjgiizrfdjhrccgsdbd.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiamdpaXpyZmRqaHJjY2dzZGJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NTY2NTMsImV4cCI6MjA5NzEzMjY1M30.SUVAmTBDvdo4pfGFOWQlMNxOOndgRnTH8N06t0xYbbg',
 
-  RAZORPAY_KEY_ID: 'rzp_test_T3q5PlgUwLZnSc',
+  RAZORPAY_KEY_ID: 'rzp_live_T3ue2C0zo4i9Tl',
   SITE_URL: 'https://sasiarts.in',
   CURRENCY: '₹',
   FREE_SHIPPING_ABOVE: 499,
