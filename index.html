@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <style>#__vercel_toolbar,[class*="vercel-toolbar"],[class*="__vercel"],[id*="vercel-toolbar"],.vercel-toolbar,[data-vc-stop-propagation]{display:none!important;}</style>
+  <script>document.addEventListener('readystatechange',function f(){if(document.readyState==='loading')return;document.removeEventListener('readystatechange',f);let e=document.querySelector('#__vercel_toolbar,vercel-toolbar');e&&(e.style.display='none')})</script>
 </head>
 <body>
   <!-- TOP BAR -->
@@ -784,6 +785,8 @@
   <script src="js/data.js?v=7"></script>
   <script src="js/supabase.js?v=7"></script>
   <script src="js/app.js?v=7"></script>
-  <script>new MutationObserver(()=>{let e=document.querySelector('[class*="vercel"],[id*="vercel-toolbar"],vercel-toolbar');e&&(e.style.display='none')}).observe(document.documentElement,{childList:!0,subtree:!0})</script>
+  <script>
+(function(){function r(){let e=document.querySelector('#__vercel_toolbar,vercel-toolbar,[id*="vercel-toolbar"]');if(e){e.style.display='none';try{if(e.shadowRoot)e.shadowRoot.querySelector('button')&&(e.shadowRoot.querySelector('button').style.display='none')}catch(ex){}}}new MutationObserver(r).observe(document.documentElement,{childList:!0,subtree:!0,attributes:!0});setInterval(r,500)})();
+  </script>
 </body>
 </html>
