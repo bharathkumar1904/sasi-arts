@@ -173,11 +173,12 @@ async function renderDashboard() {
 }
 
 // ===== PRODUCTS =====
+function adminImg(src) { return src && src.startsWith('images/') ? '../' + src : src }
 function renderProducts() {
   adminProducts = loadAdminProducts();
   document.getElementById('productTable').innerHTML = adminProducts.map(p => `
     <tr>
-      <td><img src="${p.image}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;"></td>
+      <td><img src="${adminImg(p.image)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;"></td>
       <td>${p.name}</td>
       <td>${p.category}</td>
       <td>&#8377;${p.price}</td>
@@ -730,7 +731,7 @@ function renderBestsellers() {
   table.innerHTML = adminProducts.map(p => {
     const isBest = p.is_best_seller || p.bestSeller;
     return `<tr>
-      <td><img src="${p.image}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;"></td>
+      <td><img src="${adminImg(p.image)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;"></td>
       <td><strong>${p.name}</strong></td>
       <td>${p.category}</td>
       <td>&#8377;${p.price}</td>
