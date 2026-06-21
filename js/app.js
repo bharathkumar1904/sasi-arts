@@ -272,7 +272,7 @@ function renderArtServices() {
   grid.innerHTML = `
     <div class="art-service-card animate-on-scroll">
       <div class="preview">
-        <img src="${sketchArt ? sketchArt.image : 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=600'}" alt="Sketch Art">
+        <img src="${sketchArt ? sketchArt.image : 'images/WhatsApp Image 2026-06-21 at 12.17.46 PM.jpeg'}" alt="Sketch Art">
         <span class="overlay-badge sketch">✏️ Sketch Art</span>
       </div>
       <div class="body">
@@ -290,7 +290,7 @@ function renderArtServices() {
     </div>
     <div class="art-service-card animate-on-scroll">
       <div class="preview">
-        <img src="${bloodArt ? bloodArt.image : 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600'}" alt="Blood Art">
+        <img src="${bloodArt ? bloodArt.image : 'images/WhatsApp Image 2026-06-21 at 12.23.35 PM.jpeg'}" alt="Blood Art">
         <span class="overlay-badge blood">🎨 Blood Art</span>
       </div>
       <div class="body">
