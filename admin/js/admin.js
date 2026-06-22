@@ -370,10 +370,10 @@ function viewOrderBill(id) {
   ).join('') : '<tr><td colspan="4" style="text-align:center;">No items</td></tr>';
 
   const bill = `
-    <div style="position:fixed;inset:0;z-index:9999;padding:20px;display:flex;align-items:center;justify-content:center;">
+    <div style="position:fixed;inset:0;z-index:9999;padding:10px;display:flex;align-items:center;justify-content:center;">
       <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);" onclick="document.getElementById('billOverlay').remove()"></div>
-      <div id="billOverlay" style="position:relative;background:#fff;border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:scaleIn 0.3s ease;">
-        <button onclick="this.closest('#billOverlay').parentElement.remove()" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#f0f0f0;border:none;font-size:18px;cursor:pointer;">&times;</button>
+      <div id="billOverlay" style="position:relative;background:#fff;border-radius:12px;max-width:95vw;width:700px;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:scaleIn 0.3s ease;">
+        <button onclick="this.closest('#billOverlay').parentElement.remove()" style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:#f0f0f0;border:none;font-size:16px;cursor:pointer;z-index:1;">&times;</button>
         <div style="text-align:center;margin-bottom:20px;border-bottom:2px dashed #ddd;padding-bottom:16px;">
           <h2 style="font-family:'Playfair Display',serif;color:#1A1A2E;margin:0;">Sasi Arts</h2>
           <small style="color:#999;">Photo Frames & Gifts · Rajanagaram</small>

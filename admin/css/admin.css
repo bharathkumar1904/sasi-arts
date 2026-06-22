@@ -178,4 +178,11 @@ input:focus, select:focus { border-color: var(--primary); outline: none; }
   .sidebar nav a span { display: none; }
   .main-content { margin-left: 60px; padding: 16px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-body { padding: 12px; }
+  table { font-size: 11px; }
+  th, td { padding: 8px 6px; }
+  #billOverlay { padding: 16px !important; margin: 8px; max-height: 85vh !important; font-size: 12px !important; }
+  #billOverlay h2 { font-size: 16px !important; }
+  #billOverlay table { font-size: 11px !important; }
+  #billOverlay th, #billOverlay td { padding: 6px 8px !important; }
 }
