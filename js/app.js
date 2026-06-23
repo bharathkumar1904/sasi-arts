@@ -272,7 +272,7 @@ function renderArtServices() {
   grid.innerHTML = `
     <div class="art-service-card animate-on-scroll">
       <div class="preview">
-        <img src="${sketchArt ? sketchArt.image : '/images/WhatsApp Image 2026-06-21 at 12.17.46 PM.jpeg'}" alt="Sketch Art">
+        <img src="${sketchArt ? sketchArt.image : 'images/WhatsApp Image 2026-06-21 at 12.23.35 PM.jpeg'}" alt="Sketch Art">
         <span class="overlay-badge sketch">✏️ Sketch Art</span>
       </div>
       <div class="body">
@@ -1235,31 +1235,25 @@ async function fetchApi(endpoint, body, retried) {
 
 // ===== QR CODES =====
 function generateQRs() {
-  ['qrWebsite', 'qrWhatsApp', 'qrCatalog'].forEach(id => {
+  const qrData = [
+    { id: 'qrWebsite', label: 'Visit Website', url: CONFIG.SITE_URL },
+    { id: 'qrWhatsApp', label: 'Order via WhatsApp', url: CONFIG.WHATSAPP_LINK },
+    { id: 'qrCatalog', label: 'Digital Catalog', url: CONFIG.SITE_URL + '/?catalog=1' }
+  ];
+  qrData.forEach(({ id, label, url }) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const text = id === 'qrWhatsApp' ? CONFIG.WHATSAPP_LINK : CONFIG.SITE_URL;
-    el.innerHTML = '';
-    const canvas = document.createElement('canvas');
-    canvas.width = 150; canvas.height = 150;
-    canvas.style.width = '150px';
-    canvas.style.height = '150px';
-    el.appendChild(canvas);
-    if (typeof QRCode !== 'undefined') {
-      QRCode.toCanvas(canvas, text, { width: 150 }, function(err) {
-        if (err) console.warn('QR error for', id, err);
-      });
-    }
+    el.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}" alt="${label}" style="width:150px;height:150px;border-radius:8px;">`;
   });
 }
 function downloadQR(type) {
   const el = document.getElementById(type === 'website' ? 'qrWebsite' : type === 'whatsapp' ? 'qrWhatsApp' : 'qrCatalog');
   if (!el) { showToast('QR not generated yet', 'error'); return; }
-  const canvas = el.querySelector('canvas');
-  if (canvas) {
+  const img = el.querySelector('img');
+  if (img) {
     const link = document.createElement('a');
     link.download = `sasi-arts-${type}-qr.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.href = img.src;
     link.click();
     showToast(`Downloading ${type} QR code`);
   } else {
