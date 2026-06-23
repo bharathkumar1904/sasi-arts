@@ -1,16 +1,15 @@
-// ===== PRODUCT DATA SOURCE (from DB or fallback to sample) =====
-let PRODUCTS = (() => {
+// ===== PRODUCT DATA SOURCE (data.js base, localStorage overlay) =====
+let PRODUCTS = [...SAMPLE_PRODUCTS];
+function applyAdminEdits() {
   const stored = localStorage.getItem('adminProducts');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored).map(p => ({ ...p, bestSeller: p.is_best_seller || p.bestSeller }));
-      const idSet = new Set(parsed.map(p => p.id));
-      SAMPLE_PRODUCTS.forEach(sp => { if (!idSet.has(sp.id)) parsed.push({...sp}); });
-      return parsed;
-    } catch(e) {}
-  }
-  return [...SAMPLE_PRODUCTS];
-})();
+  if (!stored) return;
+  try {
+    const parsed = JSON.parse(stored).map(p => ({ ...p, bestSeller: p.is_best_seller || p.bestSeller }));
+    const map = new Map(PRODUCTS.map(p => [p.id, p]));
+    parsed.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+    PRODUCTS = Array.from(map.values());
+  } catch(e) {}
+}
 
 // ===== STATE MANAGEMENT =====
 const state = {
@@ -55,9 +54,10 @@ function renderAll() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '3';
+  const CACHE_VERSION = '4';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
+    localStorage.removeItem('supabaseProducts');
     localStorage.setItem('sasiCacheVersion', CACHE_VERSION);
   }
   renderAll();
@@ -86,8 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
       PRODUCTS = Array.from(localMap.values());
-      // Save merged products to localStorage so admin sees them too
-      localStorage.setItem('adminProducts', JSON.stringify(PRODUCTS));
+      // Admin edits win over Supabase
+      applyAdminEdits();
+      // Save to a separate cache for admin panel view
+      localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS));
       renderAll();
     }
   }).catch(e => console.warn('Supabase load failed, using sample data:', e.message));

@@ -83,13 +83,13 @@ function adminLogout() {
 
 // ===== ADMIN STATE =====
 function loadAdminProducts() {
-  const stored = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-  const idSet = new Set(stored.map(p => p.id));
-  SAMPLE_PRODUCTS.forEach(p => {
-    if (!idSet.has(p.id)) { stored.push({...p}); idSet.add(p.id); }
-  });
-  localStorage.setItem('adminProducts', JSON.stringify(stored));
-  return stored;
+  // SAMPLE_PRODUCTS base > supabaseProducts > adminProducts (admin edits win)
+  const fromCache = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
+  const fromEdits = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+  const map = new Map(SAMPLE_PRODUCTS.map(p => [p.id, { ...p }]));
+  fromCache.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+  fromEdits.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+  return Array.from(map.values());
 }
 let adminProducts = loadAdminProducts();
 
@@ -267,15 +267,31 @@ async function addProduct() {
   delete preview.dataset.imageData;
   alert('Product added successfully!');
 }
-function editProduct(id) {
+async function editProduct(id) {
   const p = adminProducts.find(x => x.id === id);
   if (!p) return;
   const name = prompt('Product name:', p.name);
   if (name) p.name = name;
   const price = prompt('Price:', p.price);
   if (price) p.price = parseInt(price);
+  const imageUrl = prompt('Image URL (leave blank to keep current):', '');
+  if (imageUrl) p.image = imageUrl;
   localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
   renderProducts();
+  // Sync to Supabase if product has a db_id
+  const dbId = p?.db_id || p?.id;
+  if (dbId && typeof dbId === 'number' && dbId < 999999999) {
+    try {
+      const updates = {};
+      if (name) updates.name = name;
+      if (price) updates.price = parseInt(price);
+      if (imageUrl) updates.image = imageUrl;
+      const r = await updateProductInDB(dbId, updates);
+      if (r.error) console.error('Supabase update error:', r.error);
+    } catch(e) {
+      console.warn('Supabase sync skipped:', e.message);
+    }
+  }
 }
 async function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
