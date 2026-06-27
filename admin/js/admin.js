@@ -385,7 +385,30 @@ function normalizeItem(i) {
   const price = i.product_price || i.price || 0;
   let cust = i.customization;
   if (typeof cust === 'string') { try { cust = JSON.parse(cust); } catch(e) { cust = null; } }
-  return { name, qty, price, customization: cust, image: i.image || (cust && cust.photo) || '' };
+  return { name, qty, price, customization: cust || {}, image: i.image || (cust && cust.photo) || '' };
+}
+
+function openImage(src) {
+  if (!src) return;
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(`<img src="${src}" style="max-width:100%;">`); return; }
+  // fallback: create a temp link
+  const a = document.createElement('a');
+  a.href = src;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.click();
+}
+
+function downloadImage(src, filename) {
+  if (!src) return;
+  // For data URLs, create a downloadable link
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = filename || 'customization-image';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function viewOrderBill(id) {
@@ -396,14 +419,17 @@ function viewOrderBill(id) {
   const statusLabels = ['Pending','Processing','Production','Shipped','Delivered'];
   const date = new Date(order.created_at || order.date).toLocaleString('en-IN');
   const itemsHtml = items.length ? items.map(i => {
-    const cust = i.customization;
-    const custDetails = cust ? `
+    const cust = i.customization || {};
+    const custKeys = Object.keys(cust).filter(k => k !== 'baseProductId' && k !== 'photo');
+    const hasDetails = custKeys.some(k => cust[k]) || (cust.photo && !cust.photo.startsWith('https://images.unsplash'));
+    const custDetails = hasDetails ? `
       <div style="margin-top:6px;font-size:12px;color:#555;background:#f9f9f9;padding:8px 10px;border-radius:6px;border-left:3px solid #1A1A2E;">
         ${cust.size ? `<div><strong>Size:</strong> ${cust.size}</div>` : ''}
         ${cust.material ? `<div><strong>Material:</strong> ${cust.material}</div>` : ''}
         ${cust.font ? `<div><strong>Font:</strong> ${cust.font}</div>` : ''}
         ${cust.text && cust.text !== 'No text' ? `<div><strong>Text:</strong> "${cust.text}"</div>` : ''}
-        ${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${cust.photo}" style="max-width:150px;max-height:150px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;" onclick="window.open(this.src)" title="Click to open"><br><a href="${cust.photo}" download="customer-photo" style="display:inline-block;margin-top:4px;padding:4px 10px;background:#1A1A2E;color:#fff;border-radius:4px;font-size:11px;text-decoration:none;">Download</a></div>` : ''}
+        ${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${cust.photo}" style="max-width:150px;max-height:150px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;" onclick="openImage(this.src)" title="Click to view larger"><br><button onclick="downloadImage(this.previousElementSibling.src,'customer-photo-${order.id}')" style="margin-top:4px;padding:4px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;">Download</button></div>` : ''}
+        ${!custKeys.some(k => cust[k]) && !cust.photo ? `<div style="color:#999;font-style:italic;">Customization data stored</div>` : ''}
       </div>` : '';
     const imagePreview = i.image && !i.image.startsWith('data:') && !i.image.includes('unsplash') ?
       `<img src="${i.image}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:6px;">` : '';
