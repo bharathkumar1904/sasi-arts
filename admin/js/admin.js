@@ -403,7 +403,7 @@ function viewOrderBill(id) {
         ${cust.material ? `<div><strong>Material:</strong> ${cust.material}</div>` : ''}
         ${cust.font ? `<div><strong>Font:</strong> ${cust.font}</div>` : ''}
         ${cust.text && cust.text !== 'No text' ? `<div><strong>Text:</strong> "${cust.text}"</div>` : ''}
-        ${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${cust.photo}" style="max-width:120px;max-height:120px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;" onerror="this.style.display=\'none\'"></div>` : ''}
+        ${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${cust.photo}" style="max-width:150px;max-height:150px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;" onclick="window.open(this.src)" title="Click to open"><br><a href="${cust.photo}" download="customer-photo" style="display:inline-block;margin-top:4px;padding:4px 10px;background:#1A1A2E;color:#fff;border-radius:4px;font-size:11px;text-decoration:none;">Download</a></div>` : ''}
       </div>` : '';
     const imagePreview = i.image && !i.image.startsWith('data:') && !i.image.includes('unsplash') ?
       `<img src="${i.image}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:6px;">` : '';
