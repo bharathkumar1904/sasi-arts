@@ -1511,9 +1511,13 @@ async function sendAdminInvoiceEmail(order, items) {
     console.warn('EmailJS not loaded — invoice email skipped');
     return;
   }
-  const itemsHtml = items.map(i =>
-    `• ${i.name} x${i.qty || 1} = ₹${((i.price || 0) * (i.qty || 1)).toLocaleString()}`
-  ).join('\n');
+  const itemsHtml = items.map(i => {
+    const cust = i.customization || {};
+    const custStr = cust.size || cust.material || cust.text ?
+      ` [${cust.size || 'N/A'} | ${cust.material || 'N/A'}]${cust.text && cust.text !== 'No text' ? ` "${cust.text}"` : ''}${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? ' [📷 Photo attached]' : ''}`
+      : '';
+    return `• ${i.name}${custStr} x${i.qty || 1} = ₹${((i.price || 0) * (i.qty || 1)).toLocaleString()}`;
+  }).join('\n');
   const firstItem = items && items.length > 0 ? items[0] : null;
   const templateParams = {
     to_email: CONFIG.ADMIN_EMAIL,

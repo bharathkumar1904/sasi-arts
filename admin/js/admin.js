@@ -348,12 +348,16 @@ function renderOrdersTable() {
   if (!table) return;
   table.innerHTML = allOrders.length ? allOrders.map(o => {
     const itemsCount = o.items?.length || 0;
+    const hasCustom = (o.items || []).some(i => {
+      const c = i.customization;
+      return c && (c.size || c.material || c.text || c.photo);
+    });
     const custName = o.customer_name || o.customer?.name || 'Guest';
     const deliveryInfo = [o.city, o.state, o.pincode].filter(Boolean).join(', ');
     return `<tr>
       <td><strong>${o.id}</strong></td>
       <td>${custName}<br><small style="color:var(--gray-600);">${o.customer_email || ''}</small><br><small style="color:var(--gray-600);">${o.customer_phone || ''}</small></td>
-      <td>${itemsCount}</td>
+      <td>${itemsCount}${hasCustom ? ' <span style="display:inline-block;background:#F59E0B;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;">Custom</span>' : ''}</td>
       <td>&#8377;${(o.total || 0).toLocaleString()}</td>
       <td><span class="badge ${o.payment_id ? 'badge-success' : 'badge-warning'}">${o.payment_id ? 'Paid' : 'Pending'}</span></td>
       <td><select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--gray-200);">
@@ -375,15 +379,36 @@ async function updateOrderStatus(id, status) {
   }
 }
 
+function normalizeItem(i) {
+  const name = i.product_name || i.name || 'Item';
+  const qty = i.quantity || i.qty || 1;
+  const price = i.product_price || i.price || 0;
+  let cust = i.customization;
+  if (typeof cust === 'string') { try { cust = JSON.parse(cust); } catch(e) { cust = null; } }
+  return { name, qty, price, customization: cust, image: i.image || (cust && cust.photo) || '' };
+}
+
 function viewOrderBill(id) {
   const order = allOrders.find(o => o.id === id);
   if (!order) return;
-  const items = order.items || [];
+  const rawItems = order.items || [];
+  const items = rawItems.map(normalizeItem);
   const statusLabels = ['Pending','Processing','Production','Shipped','Delivered'];
   const date = new Date(order.created_at || order.date).toLocaleString('en-IN');
-  const itemsHtml = items.length ? items.map(i =>
-    `<tr><td>${i.name}</td><td>${i.qty || 1}</td><td>₹${(i.price || 0).toLocaleString()}</td><td>₹${((i.price || 0) * (i.qty || 1)).toLocaleString()}</td></tr>`
-  ).join('') : '<tr><td colspan="4" style="text-align:center;">No items</td></tr>';
+  const itemsHtml = items.length ? items.map(i => {
+    const cust = i.customization;
+    const custDetails = cust ? `
+      <div style="margin-top:6px;font-size:12px;color:#555;background:#f9f9f9;padding:8px 10px;border-radius:6px;border-left:3px solid #1A1A2E;">
+        ${cust.size ? `<div><strong>Size:</strong> ${cust.size}</div>` : ''}
+        ${cust.material ? `<div><strong>Material:</strong> ${cust.material}</div>` : ''}
+        ${cust.font ? `<div><strong>Font:</strong> ${cust.font}</div>` : ''}
+        ${cust.text && cust.text !== 'No text' ? `<div><strong>Text:</strong> "${cust.text}"</div>` : ''}
+        ${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${cust.photo}" style="max-width:120px;max-height:120px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;" onerror="this.style.display=\'none\'"></div>` : ''}
+      </div>` : '';
+    const imagePreview = i.image && !i.image.startsWith('data:') && !i.image.includes('unsplash') ?
+      `<img src="${i.image}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:6px;">` : '';
+    return `<tr><td>${imagePreview}${i.name}${custDetails}</td><td style="text-align:center;">${i.qty}</td><td style="text-align:right;">₹${i.price.toLocaleString()}</td><td style="text-align:right;">₹${(i.price * i.qty).toLocaleString()}</td></tr>`;
+  }).join('') : '<tr><td colspan="4" style="text-align:center;">No items</td></tr>';
 
   const bill = `
     <div style="position:fixed;inset:0;z-index:9999;padding:10px;display:flex;align-items:center;justify-content:center;">
@@ -409,7 +434,7 @@ function viewOrderBill(id) {
           ${order.payment_id ? `<div style="grid-column:1/-1;"><strong>Payment ID:</strong> ${order.payment_id}</div>` : ''}
         </div>
         <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <thead><tr style="background:#1A1A2E;color:#fff;"><th style="padding:8px 12px;text-align:left;">Item</th><th style="padding:8px 12px;">Qty</th><th style="padding:8px 12px;">Rate</th><th style="padding:8px 12px;">Amount</th></tr></thead>
+          <thead><tr style="background:#1A1A2E;color:#fff;"><th style="padding:8px 12px;text-align:left;">Item Details</th><th style="padding:8px 12px;">Qty</th><th style="padding:8px 12px;">Rate</th><th style="padding:8px 12px;">Amount</th></tr></thead>
           <tbody>${itemsHtml}</tbody>
         </table>
         <div style="border-top:1px solid #eee;padding-top:12px;font-size:14px;">
