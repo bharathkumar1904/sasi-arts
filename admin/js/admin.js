@@ -415,6 +415,7 @@ function viewOrderBill(id) {
   const order = allOrders.find(o => o.id === id);
   if (!order) return;
   const rawItems = order.items || [];
+  console.log('Order items raw:', rawItems.map(i => ({ name: i.name || i.product_name, cust: i.customization })));
   const items = rawItems.map(normalizeItem);
   const statusLabels = ['Pending','Processing','Production','Shipped','Delivered'];
   const date = new Date(order.created_at || order.date).toLocaleString('en-IN');
