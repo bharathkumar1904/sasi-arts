@@ -421,16 +421,16 @@ function viewOrderBill(id) {
   const date = new Date(order.created_at || order.date).toLocaleString('en-IN');
   const itemsHtml = items.length ? items.map(i => {
     const cust = i.customization || {};
-    const custKeys = Object.keys(cust).filter(k => k !== 'baseProductId' && k !== 'photo');
-    const hasDetails = custKeys.some(k => cust[k]) || (cust.photo && !cust.photo.startsWith('https://images.unsplash'));
-    const custDetails = hasDetails ? `
+    // Photo can be in cust.photo (modal flow) or i.image (builder flow)
+    const userPhoto = (cust.photo || i.image) && !((cust.photo || i.image) || '').includes('unsplash') && !((cust.photo || i.image) || '').includes('images.unsplash') ? (cust.photo || i.image) : null;
+    const willShow = [cust.size, cust.material, cust.font, (cust.text && cust.text !== 'No text') ? 'x' : null, userPhoto].filter(Boolean);
+    const custDetails = willShow.length ? `
       <div style="margin-top:6px;font-size:12px;color:#555;background:#f9f9f9;padding:8px 10px;border-radius:6px;border-left:3px solid #1A1A2E;">
         ${cust.size ? `<div><strong>Size:</strong> ${cust.size}</div>` : ''}
         ${cust.material ? `<div><strong>Material:</strong> ${cust.material}</div>` : ''}
         ${cust.font ? `<div><strong>Font:</strong> ${cust.font}</div>` : ''}
         ${cust.text && cust.text !== 'No text' ? `<div><strong>Text:</strong> "${cust.text}"</div>` : ''}
-        ${cust.photo && !cust.photo.startsWith('https://images.unsplash') ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${cust.photo}" style="max-width:150px;max-height:150px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;" onclick="openImage(this.src)" title="Click to view larger"><br><button onclick="downloadImage(this.previousElementSibling.src,'customer-photo-${order.id}')" style="margin-top:4px;padding:4px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;">Download</button></div>` : ''}
-        ${!custKeys.some(k => cust[k]) && !cust.photo ? `<div style="color:#999;font-style:italic;">Customization data stored</div>` : ''}
+        ${userPhoto ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${userPhoto}" style="max-width:150px;max-height:150px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;" onclick="openImage(this.src)" title="Click to view larger"></div><button onclick="downloadImage(this.previousElementSibling.querySelector('img').src,'customer-photo-${order.id}')" style="margin-top:4px;padding:4px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;">Download Photo</button>` : ''}
       </div>` : '';
     const imagePreview = i.image && !i.image.startsWith('data:') && !i.image.includes('unsplash') ?
       `<img src="${i.image}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:6px;">` : '';
