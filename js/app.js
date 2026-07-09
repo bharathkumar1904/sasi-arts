@@ -165,12 +165,22 @@ function renderShopProducts(products, category) {
   grid.innerHTML = filtered.map(p => renderProductCard(p)).join('');
 }
 
+function getOfferTotal(item) {
+  if (item.offer && item.offer.qty && item.offer.price && item.qty >= item.offer.qty) {
+    const sets = Math.floor(item.qty / item.offer.qty);
+    const rem = item.qty % item.offer.qty;
+    return sets * item.offer.price + rem * item.price;
+  }
+  return item.price * item.qty;
+}
+
 function renderProductCard(p) {
   const inWishlist = state.wishlist.includes(p.id);
   const badges = p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'best' ? '⭐ Best Seller' : p.badge === 'sale' ? '🔥 Sale' : '🆕 New'}</span>` : '';
   const pOld = p.oldPrice && p.oldPrice > 0 ? p.oldPrice : 0;
   const discount = pOld ? Math.round((1 - p.price / pOld) * 100) : 0;
   const allInclusive = p.allInclusive ? '<span style="font-size:11px;display:block;color:#22C55E;font-weight:500;">✅ All inclusive (GST + shipping)</span>' : '';
+  const offerBadge = p.offer && p.offer.qty && p.offer.price ? `<span class="badge badge-sale" style="background:#FF6B00;font-size:11px;">${p.offer.qty} for ₹${p.offer.price}</span>` : '';
   const priceDisplay = p.whatsappOnly ? '<span style="font-size:13px;color:var(--gray-500);">Contact for price</span>' :
     `<span class="current">&#8377;${Number(p.price).toLocaleString()}</span>${allInclusive}`;
   const actions = p.whatsappOnly ? `
@@ -358,7 +368,7 @@ function renderHomepageProducts() {
       <div class="product-card animate-on-scroll">
         <div class="image">
           <img src="${p.image}" alt="${p.name}" loading="lazy" onclick="openProductModal(${p.id})">
-          <div class="badges">${badges}</div>
+        <div class="badges">${badges}${offerBadge}</div>
           <button class="wishlist-btn" onclick="toggleWishlistItem(${p.id})" title="${inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}">
             <i class="fas fa-heart" style="color:${inWishlist ? '#FF4444' : ''}"></i>
           </button>
@@ -706,7 +716,7 @@ function updateWKUI() {
   }
   footer.style.display = 'block';
   container.innerHTML = state.wkItems.map(item => {
-    const total = item.price * item.qty;
+    const total = getOfferTotal(item);
     return `
       <div class="cart-item">
         <img src="${item.image}" alt="${item.name}">
@@ -740,14 +750,14 @@ function sendWKMessage() {
   let total = 0;
   state.wkItems.forEach(item => {
     msg += `• *${item.name}*\n`;
-    msg += `  Price: ₹${item.price} x ${item.qty} = ₹${(item.price * item.qty).toLocaleString()}\n`;
+    msg += `  Price: ₹${item.price} x ${item.qty} = ₹${(getOfferTotal(item)).toLocaleString()}\n`;
     msg += `  Category: ${item.category}\n`;
     if (item.customization) {
       msg += `  Custom: ${item.customization.material || 'N/A'} | ${item.customization.size || 'N/A'}\n`;
       if (item.customization.text) msg += `  Text: "${item.customization.text}"\n`;
     }
     if (item.image && item.image.startsWith('data:')) msg += `  📸 Custom photo uploaded\n`;
-    total += item.price * item.qty;
+    total += getOfferTotal(item);
   });
   msg += `\n💵 *Total Amount: ₹${total.toLocaleString()}*\n`;
   msg += `📍 *Delivery to: Rajahmundry & All India*\n`;
@@ -767,10 +777,10 @@ function checkoutViaWhatsApp() {
   let msg = `Hi Sasi Arts! I want to order:\n\n`;
   let total = 0;
   state.cart.forEach(item => {
-    msg += `• ${item.name} x${item.qty} = ₹${(item.price * item.qty).toLocaleString()}\n`;
+    msg += `• ${item.name} x${item.qty} = ₹${(getOfferTotal(item)).toLocaleString()}\n`;
     if (item.customization) msg += `  Size: ${item.customization.size}, Material: ${item.customization.material}, Text: "${item.customization.text || 'N/A'}"\n`;
     if (item.image && item.image.startsWith('data:')) msg += `  📸 Custom photo uploaded\n`;
-    total += item.price * item.qty;
+    total += getOfferTotal(item);
   });
   msg += `\n📦 *Subtotal: ₹${total.toLocaleString()}*\n`;
   msg += `🚚 *Delivery charges will be confirmed via WhatsApp*\n\nPlease confirm my order and share delivery charges.`;
@@ -928,13 +938,16 @@ function updateCartUI() {
   footer.style.display = 'block';
   let subtotal = 0;
   container.innerHTML = state.cart.map(item => {
-    const total = item.price * item.qty;
+    const total = getOfferTotal(item);
     subtotal += total;
+    const offerTag = item.offer && item.offer.qty && item.offer.price && item.qty >= item.offer.qty
+      ? `<span style="display:inline-block;font-size:10px;background:#FFF0E6;color:#FF6B00;padding:1px 6px;border-radius:4px;margin-left:4px;">${item.offer.qty} for ₹${item.offer.price}</span>`
+      : '';
     return `
       <div class="cart-item">
         <img src="${item.image}" alt="${item.name}">
         <div class="details">
-          <div class="name">${item.name}</div>
+          <div class="name">${item.name}${offerTag}</div>
           ${item.customization ? `<div style="font-size:12px;color:var(--gray-500);">${item.customization.material} | ${item.customization.size}</div>` : ''}
           <div class="price">&#8377;${total.toLocaleString()}</div>
           <div class="qty">
@@ -1333,7 +1346,7 @@ function openDeliveryForm() {
   document.getElementById('deliveryFormModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   const allInclusiveCart = state.cart.every(i => i.allInclusive);
-  const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const subtotal = state.cart.reduce((sum, i) => sum + getOfferTotal(i), 0);
   document.getElementById('delSubtotal').textContent = `₹${subtotal.toLocaleString()}`;
   if (allInclusiveCart) {
     document.getElementById('delTaxDisplay').textContent = '₹0 (All inclusive)';
@@ -1347,7 +1360,7 @@ function openDeliveryForm() {
   const delPincode = document.getElementById('delPincode');
   if (delPincode && !allInclusiveCart) { updateDeliveryCharge(delPincode.value); }
   if (allInclusiveCart) {
-    const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    const subtotal = state.cart.reduce((sum, i) => sum + getOfferTotal(i), 0);
     document.getElementById('grandTotalDisplay').textContent = `₹${subtotal.toLocaleString()}`;
   }
 }
@@ -1377,7 +1390,7 @@ async function updateDeliveryCharge(pincode) {
     document.getElementById('delChargeNote').textContent = result.note;
     document.getElementById('delCharge').value = result.charge;
   }
-  const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const subtotal = state.cart.reduce((sum, i) => sum + getOfferTotal(i), 0);
   const finalTax = allInclusiveCart ? 0 : calcTax(subtotal);
   const finalCharge = allInclusiveCart ? 0 : result.charge;
   const grandTotal = subtotal + finalTax + finalCharge;
@@ -1401,7 +1414,7 @@ async function submitDeliveryAndPay(e) {
     return;
   }
 
-  const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const subtotal = state.cart.reduce((sum, i) => sum + getOfferTotal(i), 0);
   const allInclusiveCart = state.cart.every(i => i.allInclusive);
   const finalShipping = allInclusiveCart ? 0 : charge;
   const finalTax = allInclusiveCart ? 0 : calcTax(subtotal);

@@ -179,11 +179,12 @@ function renderProducts() {
   document.getElementById('productTable').innerHTML = adminProducts.map(p => {
     const imgCount = (p.images && p.images.length) || 1;
     const hasOptions = (p.sizes && p.sizes.length) || (p.materials && p.materials.length);
+    const hasOffer = p.offer && p.offer.qty && p.offer.price;
     return `<tr>
       <td><img src="${adminImg(p.image)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">${imgCount > 1 ? `<span style="display:block;font-size:10px;color:var(--gray-600);text-align:center;">+${imgCount-1} more</span>` : ''}</td>
       <td>${p.name}</td>
       <td>${p.category}</td>
-      <td>&#8377;${p.price}</td>
+      <td>&#8377;${p.price}${hasOffer ? `<br><span style="font-size:10px;color:#FF6B00;">${p.offer.qty} for ₹${p.offer.price}</span>` : ''}</td>
       <td>${p.oldPrice ? '&#8377;'+p.oldPrice : '-'}</td>
       <td>${'★'.repeat(Math.floor(p.rating))}</td>
       <td style="font-size:11px;">${hasOptions ? '<span style="color:#22C55E;">✓ Options</span>' : '-'}</td>
@@ -286,9 +287,12 @@ async function addProduct() {
   const sizes = getSizesList();
   const materials = getMaterialsList();
   const allImages = [image, ...extraImages].filter(Boolean);
+  const offerQty = parseInt(document.getElementById('pOfferQty').value);
+  const offerPrice = parseInt(document.getElementById('pOfferPrice').value);
+  const offer = (offerQty && offerPrice) ? { qty: offerQty, price: offerPrice } : null;
   const newProduct = {
     name, category, price, old_price: oldPrice,
-    image, images: allImages, sizes, materials,
+    image, images: allImages, sizes, materials, offer,
     rating, reviews_count: reviewsCount, badge,
     is_best_seller: isBestSeller, is_active: true, stock: 100
   };
