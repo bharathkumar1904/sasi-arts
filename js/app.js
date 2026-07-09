@@ -504,13 +504,23 @@ async function openProductModal(id) {
   reviewRating = 0;
   resetReviewStars();
   document.getElementById('modalProductImage').src = p.image;
+  // Populate image thumbnails
+  const allImgs = [p.image, ...(p.images || []).filter(i => i !== p.image)];
+  const thumbContainer = document.getElementById('modalThumbnails');
+  if (allImgs.length > 1) {
+    thumbContainer.innerHTML = allImgs.map((url, i) =>
+      `<img src="${url}" data-index="${i}" onclick="switchModalImage(this)" style="width:60px;height:60px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid ${i === 0 ? 'var(--primary)' : 'transparent'};flex-shrink:0;transition:border 0.2s;">`
+    ).join('');
+  } else {
+    thumbContainer.innerHTML = '';
+  }
   document.getElementById('modalCategory').textContent = p.category;
   document.getElementById('modalProductName').textContent = p.name;
   const totalReviews = p.reviews || 0;
   document.getElementById('modalRating').innerHTML = `${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 >= 0.5 ? '½' : ''} <small style="color:var(--gray-500);">(${totalReviews} reviews)</small>`;
   const modalPriceHtml = p.allInclusive
-    ? `&#8377;${p.price.toLocaleString()} <small style="font-size:13px;color:#22C55E;font-weight:500;">(All inclusive)</small>`
-    : `&#8377;${p.price.toLocaleString()}${p.oldPrice ? ` <small style="font-size:1rem;color:var(--gray-500);text-decoration:line-through;">&#8377;${p.oldPrice.toLocaleString()}</small>` : ''}`;
+    ? `&#8377;${Number(p.price).toLocaleString()} <small style="font-size:13px;color:#22C55E;font-weight:500;">(All inclusive)</small>`
+    : `&#8377;${Number(p.price).toLocaleString()}${p.oldPrice ? ` <small style="font-size:1rem;color:var(--gray-500);text-decoration:line-through;">&#8377;${Number(p.oldPrice).toLocaleString()}</small>` : ''}`;
   document.getElementById('modalPrice').innerHTML = modalPriceHtml;
   // Populate size & material from product options
   populateProductOptions(p, 'modalSize', 'modalMaterial');
@@ -545,6 +555,12 @@ async function openProductModal(id) {
       `;
     }
   }
+}
+
+function switchModalImage(el) {
+  document.getElementById('modalProductImage').src = el.src;
+  document.querySelectorAll('#modalThumbnails img').forEach(t => t.style.borderColor = 'transparent');
+  el.style.borderColor = 'var(--primary)';
 }
 
 function closeProductModal() {

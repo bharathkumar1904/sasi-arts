@@ -692,7 +692,8 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:32px;">
         <div>
           <img id="modalProductImage" src="" style="width:100%;border-radius:var(--radius-lg);aspect-ratio:1;object-fit:cover;">
-          <div style="margin-top:16px;border:2px dashed var(--gray-300);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('modalPhotoInput').click()">
+          <div id="modalThumbnails" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;"></div>
+          <div style="margin-top:12px;border:2px dashed var(--gray-300);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('modalPhotoInput').click()">
             <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--primary);display:block;margin-bottom:4px;"></i>
             <small style="color:var(--gray-500);">Upload your photo to customize</small>
           </div>
@@ -780,10 +781,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="js/config.js?v=14"></script>
-  <script src="js/data.js?v=14"></script>
-  <script src="js/supabase.js?v=14"></script>
-  <script src="js/app.js?v=14"></script>
+  <script src="js/config.js?v=15"></script>
+  <script src="js/data.js?v=15"></script>
+  <script src="js/supabase.js?v=15"></script>
+  <script src="js/app.js?v=15"></script>
   <script>
 (function(){function r(){let e=document.querySelector('#__vercel_toolbar,vercel-toolbar,[id*="vercel-toolbar"]');if(e){e.style.display='none';try{if(e.shadowRoot)e.shadowRoot.querySelector('button')&&(e.shadowRoot.querySelector('button').style.display='none')}catch(ex){}}}new MutationObserver(r).observe(document.documentElement,{childList:!0,subtree:!0,attributes:!0});setInterval(r,500)})();
   </script>
