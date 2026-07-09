@@ -418,8 +418,9 @@ function renderOrdersTable() {
   table.innerHTML = allOrders.length ? allOrders.map(o => {
     const itemsCount = o.items?.length || 0;
     const hasCustom = (o.items || []).some(i => {
-      const c = i.customization;
-      return c && (c.size || c.material || c.text || c.photo);
+      let c = i.customization;
+      if (typeof c === 'string') { try { c = JSON.parse(c); } catch(e) { c = null; } }
+      return c && (c.size || c.material || c.text || c.font || c.photo || (i.image && !i.image.includes('unsplash')));
     });
     const custName = o.customer_name || o.customer?.name || 'Guest';
     const deliveryInfo = [o.city, o.state, o.pincode].filter(Boolean).join(', ');
