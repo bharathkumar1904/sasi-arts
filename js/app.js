@@ -434,6 +434,7 @@ function builderSelectProduct(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
   builderSelectedProduct = p;
+  populateProductOptions(p, 'productSize', 'productMaterial');
   document.getElementById('builderStep2').style.display = 'none';
   document.getElementById('builderStep3').style.display = 'block';
   document.getElementById('builderSelectedName').textContent = p.name;
@@ -464,6 +465,22 @@ function builderBackToProducts() {
 let currentModalProduct = null;
 let modalPhotoData = null;
 
+const DEFAULT_SIZES = ['Small (6x4)', 'Medium (8x6)', 'Large (12x8)'];
+const DEFAULT_MATERIALS = ['Premium Wood', 'Acrylic', 'Metal', 'LED Backlit'];
+
+function populateProductOptions(p, sizeSelectId, materialSelectId) {
+  const sizes = (p.sizes && p.sizes.length) ? p.sizes : DEFAULT_SIZES;
+  const materials = (p.materials && p.materials.length) ? p.materials : DEFAULT_MATERIALS;
+  const sizeSel = document.getElementById(sizeSelectId);
+  const matSel = document.getElementById(materialSelectId);
+  if (sizeSel) {
+    sizeSel.innerHTML = sizes.map((s, i) => `<option ${i === 1 ? 'selected' : ''}>${s}</option>`).join('');
+  }
+  if (matSel) {
+    matSel.innerHTML = materials.map((m, i) => `<option ${i === 1 ? 'selected' : ''}>${m}</option>`).join('');
+  }
+}
+
 async function openProductModal(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
@@ -480,6 +497,8 @@ async function openProductModal(id) {
     ? `&#8377;${p.price.toLocaleString()} <small style="font-size:13px;color:#22C55E;font-weight:500;">(All inclusive)</small>`
     : `&#8377;${p.price.toLocaleString()}${p.oldPrice ? ` <small style="font-size:1rem;color:var(--gray-500);text-decoration:line-through;">&#8377;${p.oldPrice.toLocaleString()}</small>` : ''}`;
   document.getElementById('modalPrice').innerHTML = modalPriceHtml;
+  // Populate size & material from product options
+  populateProductOptions(p, 'modalSize', 'modalMaterial');
   document.getElementById('modalCustomText').value = '';
   document.getElementById('reviewName').value = '';
   document.getElementById('reviewText').value = '';

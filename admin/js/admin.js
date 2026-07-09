@@ -176,20 +176,23 @@ async function renderDashboard() {
 function adminImg(src) { return src && src.startsWith('images/') ? '../' + src : src }
 function renderProducts() {
   adminProducts = loadAdminProducts();
-  document.getElementById('productTable').innerHTML = adminProducts.map(p => `
-    <tr>
-      <td><img src="${adminImg(p.image)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;"></td>
+  document.getElementById('productTable').innerHTML = adminProducts.map(p => {
+    const imgCount = (p.images && p.images.length) || 1;
+    const hasOptions = (p.sizes && p.sizes.length) || (p.materials && p.materials.length);
+    return `<tr>
+      <td><img src="${adminImg(p.image)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">${imgCount > 1 ? `<span style="display:block;font-size:10px;color:var(--gray-600);text-align:center;">+${imgCount-1} more</span>` : ''}</td>
       <td>${p.name}</td>
       <td>${p.category}</td>
       <td>&#8377;${p.price}</td>
       <td>${p.oldPrice ? '&#8377;'+p.oldPrice : '-'}</td>
       <td>${'★'.repeat(Math.floor(p.rating))}</td>
+      <td style="font-size:11px;">${hasOptions ? '<span style="color:#22C55E;">✓ Options</span>' : '-'}</td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function showAddProduct() {
@@ -210,6 +213,48 @@ function handleAdminImage(e) {
     preview.dataset.imageData = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function addExtraImageRow(url) {
+  const container = document.getElementById('extraImagesContainer');
+  const row = document.createElement('div');
+  row.className = 'extra-image-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = `<input type="url" class="pExtraImage" value="${url || ''}" placeholder="Image URL" style="flex:1;padding:8px 12px;border:2px solid var(--gray-200);border-radius:8px;font-size:13px;"><button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.remove()" style="color:#FF4444;border-color:#FF4444;">&times;</button>`;
+  container.appendChild(row);
+}
+
+function handleExtraImages(e) {
+  const files = Array.from(e.target.files);
+  const previewContainer = document.getElementById('extraImagesPreview');
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      // Add to preview
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.style.cssText = 'width:80px;height:80px;border-radius:6px;object-fit:cover;border:1px solid #ddd;';
+      previewContainer.appendChild(img);
+      // Add URL to list
+      addExtraImageRow(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function getExtraImages() {
+  const inputs = document.querySelectorAll('.pExtraImage');
+  return Array.from(inputs).map(i => i.value).filter(Boolean);
+}
+
+function getSizesList() {
+  return document.getElementById('pSizes').value.split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+function getMaterialsList() {
+  return document.getElementById('pMaterials').value.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
 
@@ -237,9 +282,14 @@ async function addProduct() {
     else console.warn('Image upload failed, using local:', error);
   }
 
+  const extraImages = getExtraImages();
+  const sizes = getSizesList();
+  const materials = getMaterialsList();
+  const allImages = [image, ...extraImages].filter(Boolean);
   const newProduct = {
     name, category, price, old_price: oldPrice,
-    image, rating, reviews_count: reviewsCount, badge,
+    image, images: allImages, sizes, materials,
+    rating, reviews_count: reviewsCount, badge,
     is_best_seller: isBestSeller, is_active: true, stock: 100
   };
   // Save to Supabase first to get the real ID
@@ -274,8 +324,19 @@ async function editProduct(id) {
   if (name) p.name = name;
   const price = prompt('Price:', p.price);
   if (price) p.price = parseInt(price);
+  const category = prompt('Category:', p.category || '');
+  if (category) p.category = category;
+  const sizesStr = prompt('Sizes (comma-separated, leave blank to keep):', (p.sizes || []).join(', '));
+  if (sizesStr !== null) p.sizes = sizesStr.split(',').map(s => s.trim()).filter(Boolean);
+  const materialsStr = prompt('Materials (comma-separated, leave blank to keep):', (p.materials || []).join(', '));
+  if (materialsStr !== null) p.materials = materialsStr.split(',').map(s => s.trim()).filter(Boolean);
   const imageUrl = prompt('Image URL (leave blank to keep current):', '');
   if (imageUrl) p.image = imageUrl;
+  const extraImages = prompt('Extra image URLs (comma-separated):', (p.images || []).slice(1).join(', '));
+  if (extraImages !== null) {
+    const newExtra = extraImages.split(',').map(s => s.trim()).filter(Boolean);
+    p.images = [p.image, ...newExtra];
+  }
   localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
   renderProducts();
   // Sync to Supabase if product has a db_id
@@ -285,7 +346,11 @@ async function editProduct(id) {
       const updates = {};
       if (name) updates.name = name;
       if (price) updates.price = parseInt(price);
+      if (category) updates.category = category;
       if (imageUrl) updates.image = imageUrl;
+      if (sizesStr) updates.sizes = p.sizes;
+      if (materialsStr) updates.materials = p.materials;
+      if (extraImages) updates.images = p.images;
       const r = await updateProductInDB(dbId, updates);
       if (r.error) console.error('Supabase update error:', r.error);
     } catch(e) {

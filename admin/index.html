@@ -116,7 +116,7 @@
       </div>
       <div class="card">
         <div class="card-body">
-          <table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Old Price</th><th>Rating</th><th>Actions</th></tr></thead><tbody id="productTable"></tbody></table>
+          <table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Old Price</th><th>Rating</th><th>Options</th><th>Actions</th></tr></thead><tbody id="productTable"></tbody></table>
         </div>
       </div>
       <div id="addProductForm" style="display:none;" class="card">
@@ -148,13 +148,36 @@
               </div>
               <div class="form-group"><label style="display:flex;align-items:center;gap:8px;margin-top:24px;"><input type="checkbox" id="pBestSeller" checked> Best Seller</label></div>
             </div>
-            <div class="form-group"><label>Product Image</label>
+            <div class="form-group"><label>Product Image (Thumbnail)</label>
               <div style="border:2px dashed var(--gray-200);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all 0.3s;" id="adminUploadZone" onclick="document.getElementById('pImageInput').click()">
                 <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:var(--primary);display:block;margin-bottom:8px;"></i>
-                <p style="font-size:13px;color:var(--gray-600);">Drag & drop or click to upload</p>
+                <p style="font-size:13px;color:var(--gray-600);">Click to upload main image</p>
                 <img id="adminImagePreview" style="display:none;max-height:120px;margin:8px auto;border-radius:6px;">
               </div>
               <input type="file" id="pImageInput" accept="image/*" style="display:none" onchange="handleAdminImage(event)">
+            </div>
+            <div class="form-group"><label>Additional Images</label>
+              <div id="extraImagesContainer">
+                <div class="extra-image-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                  <input type="url" class="pExtraImage" placeholder="Image URL (or use upload below)" style="flex:1;padding:8px 12px;border:2px solid var(--gray-200);border-radius:8px;font-size:13px;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.remove()" style="color:#FF4444;border-color:#FF4444;">&times;</button>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload More Images
+                  <input type="file" id="pExtraImagesInput" accept="image/*" multiple style="display:none" onchange="handleExtraImages(event)">
+                </label>
+                <button class="btn btn-outline btn-sm" onclick="addExtraImageRow()"><i class="fas fa-plus"></i> Add URL</button>
+              </div>
+              <div id="extraImagesPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Sizes (one per line)</label>
+                <textarea id="pSizes" rows="3" style="width:100%;padding:8px 12px;border:2px solid var(--gray-200);border-radius:8px;font-size:13px;" placeholder="Small (6x4)&#10;Medium (8x6)&#10;Large (12x8)"></textarea>
+              </div>
+              <div class="form-group"><label>Materials (one per line)</label>
+                <textarea id="pMaterials" rows="3" style="width:100%;padding:8px 12px;border:2px solid var(--gray-200);border-radius:8px;font-size:13px;" placeholder="Premium Wood&#10;Acrylic&#10;Metal&#10;LED Backlit"></textarea>
+              </div>
             </div>
             <button class="btn btn-primary" onclick="addProduct()"><i class="fas fa-save"></i> Save Product</button>
           </div>
