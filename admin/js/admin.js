@@ -269,6 +269,7 @@ async function addProduct() {
   const reviewsCount = parseInt(document.getElementById('pReviews').value) || 0;
   const badge = document.getElementById('pBadge').value;
   const isBestSeller = document.getElementById('pBestSeller').checked;
+  const customizable = document.getElementById('pCustomizable').checked;
   const preview = document.getElementById('adminImagePreview');
   let image = preview.dataset.imageData || preview.src || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=400';
   if (!name || !price) { alert('Please fill required fields'); return; }
@@ -295,18 +296,22 @@ async function addProduct() {
     name, category, price, old_price: oldPrice,
     image, images: allImages, sizes, materials, offer,
     rating, reviews_count: reviewsCount, badge,
-    is_best_seller: isBestSeller, is_active: true, stock: 100
+    is_best_seller: isBestSeller, customizable,
+    is_active: true, stock: 100
   };
   // Save to Supabase first to get the real ID
   let dbId = null;
+  let supabaseError = false;
   try {
     const r = await saveProductToDB(newProduct);
     if (r.error) {
+      supabaseError = true;
       console.error('Supabase save error:', r.error);
     } else if (r.data && r.data.length > 0) {
       dbId = r.data[0].id;
     }
   } catch(e) {
+    supabaseError = true;
     console.warn('Product saved locally, Supabase sync skipped:', e.message);
   }
   const finalId = dbId || Date.now();
@@ -320,7 +325,11 @@ async function addProduct() {
   preview.src = '';
   preview.style.display = 'none';
   delete preview.dataset.imageData;
-  alert('Product added successfully!');
+  if (supabaseError) {
+    alert('Product saved locally. Supabase sync failed.\n\nPossible reasons:\n- Missing columns (run migration SQL in database/schema.sql)\n- You need to login first\n- Network error\n\nThe product will appear only to you until Supabase is fixed.');
+  } else {
+    alert('Product added successfully!');
+  }
 }
 async function editProduct(id) {
   const p = adminProducts.find(x => x.id === id);
@@ -342,6 +351,7 @@ async function editProduct(id) {
     const newExtra = extraImages.split(',').map(s => s.trim()).filter(Boolean);
     p.images = [p.image, ...newExtra];
   }
+  p.customizable = confirm(`Customizable? (Current: ${p.customizable !== false ? 'Yes' : 'No'})\n\nOK = Yes, Cancel = No`);
   localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
   renderProducts();
   // Sync to Supabase if product has a db_id
@@ -356,6 +366,7 @@ async function editProduct(id) {
       if (sizesStr) updates.sizes = p.sizes;
       if (materialsStr) updates.materials = p.materials;
       if (extraImages) updates.images = p.images;
+      updates.customizable = p.customizable !== false;
       const r = await updateProductInDB(dbId, updates);
       if (r.error) console.error('Supabase update error:', r.error);
     } catch(e) {

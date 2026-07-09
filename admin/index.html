@@ -150,7 +150,10 @@
                   <option value="new">🆕 New</option>
                 </select>
               </div>
-              <div class="form-group"><label style="display:flex;align-items:center;gap:8px;margin-top:24px;"><input type="checkbox" id="pBestSeller" checked> Best Seller</label></div>
+              <div class="form-group" style="display:flex;gap:16px;margin-top:24px;">
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="pBestSeller" checked> Best Seller</label>
+                <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="pCustomizable" checked> Customizable</label>
+              </div>
             </div>
             <div class="form-group"><label>Product Image (Thumbnail)</label>
               <div style="border:2px dashed var(--gray-200);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all 0.3s;" id="adminUploadZone" onclick="document.getElementById('pImageInput').click()">
@@ -316,9 +319,9 @@
   </div><!-- /adminPanel -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/config.js?v=13"></script>
-  <script src="../js/data.js?v=13"></script>
-  <script src="../js/supabase.js?v=13"></script>
-  <script src="js/admin.js?v=13"></script>
+  <script src="../js/config.js?v=14"></script>
+  <script src="../js/data.js?v=14"></script>
+  <script src="../js/supabase.js?v=14"></script>
+  <script src="js/admin.js?v=14"></script>
 </body>
 </html>

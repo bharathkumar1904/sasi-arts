@@ -20,6 +20,10 @@ CREATE TABLE products (
   is_best_seller BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
   stock INTEGER DEFAULT 100,
+  sizes TEXT[],
+  materials TEXT[],
+  offer JSONB,
+  customizable BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -313,3 +317,11 @@ INSERT INTO categories (name, slug, icon) VALUES
   ('Wedding Gifts', 'wedding-gifts', '💒'),
   ('Sketch Art', 'sketch-art', '✏️'),
   ('Blood Art', 'blood-art', '🎨');
+
+-- ============================================================
+-- MIGRATIONS (run these if table already exists without new columns)
+-- ============================================================
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes TEXT[];
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS materials TEXT[];
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS offer JSONB;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS customizable BOOLEAN DEFAULT false;

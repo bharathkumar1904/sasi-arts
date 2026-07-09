@@ -183,6 +183,7 @@ function renderProductCard(p) {
   const discount = pOld ? Math.round((1 - p.price / pOld) * 100) : 0;
   const allInclusive = p.allInclusive ? '<span style="font-size:11px;display:block;color:#22C55E;font-weight:500;">✅ All inclusive (GST + shipping)</span>' : '';
   const offerBadge = p.offer && p.offer.qty && p.offer.price ? `<span class="badge badge-sale" style="background:#FF6B00;font-size:11px;">${p.offer.qty} for ₹${p.offer.price}</span>` : '';
+  const customizableBadge = p.customizable ? '<span class="badge" style="background:#8B5CF6;font-size:11px;">✨ Customizable</span>' : '';
   const priceDisplay = p.whatsappOnly ? '<span style="font-size:13px;color:var(--gray-500);">Contact for price</span>' :
     `<span class="current">&#8377;${Number(p.price).toLocaleString()}</span>${allInclusive}`;
   const actions = p.whatsappOnly ? `
@@ -195,7 +196,7 @@ function renderProductCard(p) {
     <div class="product-card">
       <div class="image">
         <img src="${p.image}" alt="${p.name}" loading="lazy" onclick="openProductModal(${p.id})">
-        <div class="badges">${badges}</div>
+        <div class="badges">${badges}${customizableBadge}</div>
         <button class="wishlist-btn" onclick="toggleWishlistItem(${p.id})" title="${inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}">
           <i class="fas fa-heart" style="color:${inWishlist ? '#FF4444' : ''}"></i>
         </button>
