@@ -56,7 +56,7 @@ function renderAll() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '5';
+  const CACHE_VERSION = '6';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
     localStorage.removeItem('supabaseProducts');
@@ -367,11 +367,13 @@ function renderHomepageProducts() {
     const discount = pOld ? Math.round((1 - p.price / pOld) * 100) : 0;
     const priceStr = Number(p.price).toLocaleString();
     const oldPriceStr = pOld ? Number(pOld).toLocaleString() : '';
+    const offerBadge = p.offer && p.offer.qty && p.offer.price ? `<span class="badge badge-sale" style="background:#FF6B00;font-size:11px;">${p.offer.qty} for ₹${p.offer.price}</span>` : '';
+    const customizableBadge = p.customizable ? '<span class="badge" style="background:#8B5CF6;font-size:11px;">✨ Customizable</span>' : '';
     return `
       <div class="product-card animate-on-scroll">
         <div class="image">
           <img src="${p.image}" alt="${p.name}" loading="lazy" onclick="openProductModal(${p.id})">
-        <div class="badges">${badges}${offerBadge}</div>
+        <div class="badges">${badges}${offerBadge}${customizableBadge}</div>
           <button class="wishlist-btn" onclick="toggleWishlistItem(${p.id})" title="${inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}">
             <i class="fas fa-heart" style="color:${inWishlist ? '#FF4444' : ''}"></i>
           </button>
@@ -566,7 +568,7 @@ async function handleModalPhoto(e) {
   reader.readAsDataURL(file);
   // Upload to Supabase Storage
   const ext = file.name.split('.').pop() || 'jpg';
-  const filePath = generateFilePath('uploads');
+  const filePath = generateFilePath('uploads', ext);
   const { url, error } = await uploadImage('products', filePath, file);
   if (url) {
     modalPhotoData = url;
@@ -1042,7 +1044,8 @@ function handleSearch(e) {
       </div>
     `).join('');
     // Add "View all results" link
-    results.innerHTML += `<div style="padding:8px 16px;text-align:center;border-top:1px solid var(--gray-100);"><span style="font-size:13px;color:var(--primary);cursor:pointer;font-weight:600;" onclick="document.getElementById('searchInput').value='${query}';document.getElementById('searchResults').style.display='none';openShop('','${query}')">🔍 View all ${matches.length} results in Shop →</span></div>`;
+    const safeQuery = query.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    results.innerHTML += `<div style="padding:8px 16px;text-align:center;border-top:1px solid var(--gray-100);"><span style="font-size:13px;color:var(--primary);cursor:pointer;font-weight:600;" onclick="document.getElementById('searchInput').value='${safeQuery}';document.getElementById('searchResults').style.display='none';openShop('','${safeQuery}')">🔍 View all ${matches.length} results in Shop →</span></div>`;
   }
   results.style.display = 'block';
   // If Enter key is pressed, open shop page with results
@@ -1092,7 +1095,7 @@ async function processPhoto(file) {
     showToast('Uploading to cloud...');
     // Upload to Supabase Storage
     const ext = file.name.split('.').pop() || 'jpg';
-    const filePath = generateFilePath('uploads');
+    const filePath = generateFilePath('uploads', ext);
     const { url, error } = await uploadImage('products', filePath, file);
     if (url) {
       uploadedPhotoUrl = url;

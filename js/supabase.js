@@ -244,10 +244,11 @@ function getStorageUrl(bucket, path) {
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 }
 
-function generateFilePath(prefix) {
+function generateFilePath(prefix, ext) {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
-  return `${prefix}/${timestamp}-${random}`;
+  const extension = ext ? `.${ext}` : '';
+  return `${prefix}/${timestamp}-${random}${extension}`;
 }
 
 // Auto-test connection on load

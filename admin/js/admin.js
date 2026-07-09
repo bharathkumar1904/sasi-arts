@@ -279,7 +279,7 @@ async function addProduct() {
     const ext = image.split(';')[0].split('/')[1] || 'jpg';
     const blob = await (await fetch(image)).blob();
     const file = new File([blob], `product.${ext}`, { type: `image/${ext}` });
-    const filePath = generateFilePath('products');
+    const filePath = generateFilePath('products', ext);
     const { url, error } = await uploadImage('products', filePath, file);
     if (url) image = url;
     else console.warn('Image upload failed, using local:', error);
@@ -934,7 +934,7 @@ function exportData() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '2';
+  const CACHE_VERSION = '6';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
     localStorage.setItem('sasiCacheVersion', CACHE_VERSION);

@@ -3,7 +3,7 @@ const CONFIG = {
   STORE_TAGLINE: 'Create Memories Through Personalized Gifts',
   STORE_ADDRESS: 'Rajanagaram, Rajahmundry',
   WHATSAPP_NUMBER: '918106545049',
-  WHATSAPP_LINK: 'https://wa.me/8106545049',
+  WHATSAPP_LINK: 'https://wa.me/918106545049',
   WORKING_HOURS: 'Mon-Sat: 9:00 AM - 8:00 PM',
   GOOGLE_RATING: '4.8',
   PRIMARY_COLOR: '#FF6B00',
