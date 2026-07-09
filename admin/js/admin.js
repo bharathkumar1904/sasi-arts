@@ -86,9 +86,10 @@ function loadAdminProducts() {
   // SAMPLE_PRODUCTS base > supabaseProducts > adminProducts (admin edits win)
   const fromCache = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
   const fromEdits = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-  const map = new Map(SAMPLE_PRODUCTS.map(p => [p.id, { ...p }]));
-  fromCache.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
-  fromEdits.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+  const deletedIds = new Set(fromEdits.filter(p => p._deleted).map(p => p.id));
+  const map = new Map(SAMPLE_PRODUCTS.filter(p => !deletedIds.has(p.id)).map(p => [p.id, { ...p }]));
+  fromCache.filter(p => !deletedIds.has(p.id)).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+  fromEdits.filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
   return Array.from(map.values());
 }
 let adminProducts = loadAdminProducts();
@@ -365,16 +366,16 @@ async function editProduct(id) {
 async function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
   const p = adminProducts.find(x => x.id === id);
-  adminProducts = adminProducts.filter(x => x.id !== id);
+  // Mark as deleted (keeps it in adminProducts so the flag propagates to the main site)
+  adminProducts = adminProducts.map(x => x.id === id ? { ...x, _deleted: true } : x);
   localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
   renderProducts();
-  // Use the actual Supabase db_id if available; fallback to id for sample products
+  // Delete from Supabase
   let dbId = p?.db_id || p?.id;
-  if (!dbId || typeof dbId === 'string' && dbId.length > 10) {
-    console.warn('No db_id for this product — it may not exist in Supabase');
-    return;
-  }
-  try { const r = await deleteProductFromDB(dbId); if (r.error) console.error('Supabase delete error:', r.error); } catch(e) { console.warn('Deleted locally, Supabase sync skipped:', e.message); }
+  if (!dbId) { console.warn('No ID for this product'); return; }
+  // If dbId is a Date.now() number (local-only product), skip DB delete
+  if (typeof dbId === 'number' && dbId > 999999999) { return; }
+  try { const r = await deleteProductFromDB(dbId); if (r.error) console.error('Supabase delete error:', r.error); } catch(e) { console.warn('Supabase sync skipped:', e.message); }
 }
 
 // ===== ORDERS =====

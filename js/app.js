@@ -5,8 +5,10 @@ function applyAdminEdits() {
   if (!stored) return;
   try {
     const parsed = JSON.parse(stored).map(p => ({ ...p, bestSeller: p.is_best_seller || p.bestSeller }));
+    const deletedIds = new Set(parsed.filter(p => p._deleted).map(p => p.id));
+    PRODUCTS = PRODUCTS.filter(p => !deletedIds.has(p.id));
     const map = new Map(PRODUCTS.map(p => [p.id, p]));
-    parsed.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+    parsed.filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
     PRODUCTS = Array.from(map.values());
   } catch(e) {}
 }
@@ -54,7 +56,7 @@ function renderAll() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '4';
+  const CACHE_VERSION = '5';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
     localStorage.removeItem('supabaseProducts');
