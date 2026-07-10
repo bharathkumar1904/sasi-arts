@@ -46,6 +46,7 @@ const CONFIG = {
     'Birthday Gifts',
     'Anniversary Gifts',
     'Wedding Gifts',
+    'Bangles',
     'Sketch Art',
     'Blood Art'
   ]

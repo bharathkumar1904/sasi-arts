@@ -315,6 +315,7 @@ INSERT INTO categories (name, slug, icon) VALUES
   ('Birthday Gifts', 'birthday-gifts', '🎂'),
   ('Anniversary Gifts', 'anniversary-gifts', '💑'),
   ('Wedding Gifts', 'wedding-gifts', '💒'),
+  ('Bangles', 'Bangless', '⭕'),
   ('Sketch Art', 'sketch-art', '✏️'),
   ('Blood Art', 'blood-art', '🎨');
 

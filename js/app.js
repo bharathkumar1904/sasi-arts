@@ -1025,10 +1025,14 @@ function toggleWishlistItem(id) {
   }
   saveState('wishlist');
   updateWishlistUI();
-  if (document.getElementById('shop-page').style.display === 'block') {
-    renderShopProducts(shopCurrentProducts, shopCurrentCategory);
-  } else {
-    renderHomepageProducts();
+  try {
+    if (document.getElementById('shop-page').style.display === 'block') {
+      renderShopProducts(shopCurrentProducts, shopCurrentCategory);
+    } else {
+      renderHomepageProducts();
+    }
+  } catch(e) {
+    console.warn('Re-render after wishlist toggle failed:', e);
   }
 }
 function updateWishlistUI() {
@@ -1040,8 +1044,20 @@ function toggleWishlist() {
     return;
   }
   const wishProducts = PRODUCTS.filter(p => state.wishlist.includes(p.id));
-  openShop();
-  renderShopProducts(wishProducts.length ? wishProducts : PRODUCTS, '');
+  // Show shop overlay + populate category filter
+  document.getElementById('shop-page').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  const catFilter = document.getElementById('shopCategoryFilter');
+  if (catFilter) {
+    const cats = CONFIG.PRODUCT_CATEGORIES.filter(c => PRODUCTS.some(p => p.category === c));
+    catFilter.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+  try {
+    renderShopProducts(wishProducts.length ? wishProducts : PRODUCTS, '');
+  } catch(e) {
+    console.warn('Wishlist render error, showing all products:', e);
+    renderShopProducts(PRODUCTS, '');
+  }
 }
 
 // ===== SEARCH =====

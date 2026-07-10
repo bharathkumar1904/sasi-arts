@@ -61,6 +61,7 @@ const CATEGORY_ICONS = {
   'Birthday Gifts': '🎂',
   'Anniversary Gifts': '💑',
   'Wedding Gifts': '💒',
+  'Bangles': '⭕',
   'Sketch Art': '✏️',
   'Blood Art': '🎨'
 };
