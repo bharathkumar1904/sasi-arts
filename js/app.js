@@ -62,6 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('supabaseProducts');
     localStorage.setItem('sasiCacheVersion', CACHE_VERSION);
   }
+  // Apply admin edits from localStorage immediately (before Supabase loads)
+  applyAdminEdits();
   renderAll();
 
   loadOfferFromSupabase().catch(() => {});
