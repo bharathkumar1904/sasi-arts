@@ -62,7 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('supabaseProducts');
     localStorage.setItem('sasiCacheVersion', CACHE_VERSION);
   }
-  // Apply admin edits from localStorage immediately (before Supabase loads)
+  // Load cached Supabase data immediately (so shop shows DB products on first click)
+  const cached = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
+  if (cached.length) {
+    const map = new Map(PRODUCTS.map(p => [p.id, p]));
+    cached.forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+    PRODUCTS = Array.from(map.values());
+  }
   applyAdminEdits();
   renderAll();
 
@@ -95,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Save to a separate cache for admin panel view
       localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS));
       renderAll();
+      // Re-render shop page if it's currently open (so Supabase products appear immediately)
+      const shopPage = document.getElementById('shop-page');
+      if (shopPage && shopPage.style.display === 'block') {
+        renderShopProducts(PRODUCTS, shopCurrentCategory);
+      }
     }
   }).catch(e => console.warn('Supabase load failed, using sample data:', e.message));
 
