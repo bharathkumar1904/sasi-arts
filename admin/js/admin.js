@@ -302,16 +302,19 @@ async function addProduct() {
   // Save to Supabase first to get the real ID
   let dbId = null;
   let supabaseError = false;
+  let supabaseErrorMsg = '';
   try {
     const r = await saveProductToDB(newProduct);
     if (r.error) {
       supabaseError = true;
+      supabaseErrorMsg = typeof r.error === 'string' ? r.error.slice(0, 200) : JSON.stringify(r.error);
       console.error('Supabase save error:', r.error);
     } else if (r.data && r.data.length > 0) {
       dbId = r.data[0].id;
     }
   } catch(e) {
     supabaseError = true;
+    supabaseErrorMsg = e.message || e;
     console.warn('Product saved locally, Supabase sync skipped:', e.message);
   }
   const finalId = dbId || Date.now();
@@ -326,7 +329,8 @@ async function addProduct() {
   preview.style.display = 'none';
   delete preview.dataset.imageData;
   if (supabaseError) {
-    alert('Product saved locally. Supabase sync failed.\n\nPossible reasons:\n- Missing columns (run migration SQL in database/schema.sql)\n- You need to login first\n- Network error\n\nThe product will appear only to you until Supabase is fixed.');
+    const errMsg = supabaseErrorMsg || 'Unknown error (check console)';
+    alert(`Product saved locally. Supabase sync failed.\n\nError: ${errMsg}\n\nThe product will appear only to you until Supabase is fixed.`);
   } else {
     alert('Product added successfully!');
   }
