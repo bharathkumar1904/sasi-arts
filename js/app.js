@@ -1,5 +1,5 @@
 // ===== PRODUCT DATA SOURCE (data.js base, localStorage overlay) =====
-let PRODUCTS = [...SAMPLE_PRODUCTS];
+let PRODUCTS = [...SAMPLE_PRODUCTS];;
 function applyAdminEdits() {
   const stored = localStorage.getItem('adminProducts');
   if (!stored) return;
@@ -56,7 +56,7 @@ function renderAll() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '7';
+  const CACHE_VERSION = dataHash();
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
     localStorage.removeItem('supabaseProducts');

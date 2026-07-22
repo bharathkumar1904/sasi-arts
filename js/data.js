@@ -1,3 +1,8 @@
+function dataHash() {
+  let s = JSON.stringify(SAMPLE_PRODUCTS.map(p => [p.id, p.name, p.price, p.oldPrice, p.image, p.badge, p.bestSeller, p.is_active]));
+  let h = 0; for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+  return 'd' + Math.abs(h).toString(36);
+}
 const SAMPLE_PRODUCTS = [
   { id: 1, name: 'Baby Birthday memories frame 10/15', category: 'Personalized Photo Frames', price: 499, oldPrice: 899, image: 'images/WhatsApp Image 2026-07-22 at 8.29.52 PM.jpeg', rating: 4.8, reviews: 156, badge: 'best', bestSeller: true },
 ];
