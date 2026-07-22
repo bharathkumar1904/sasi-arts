@@ -7,8 +7,6 @@ const SAMPLE_PRODUCTS = [
   { id: 1, name: 'Baby Birthday memories frame 10/15', category: 'Personalized Photo Frames', price: 499, oldPrice: 899, image: 'images/WhatsApp Image 2026-07-22 at 8.29.52 PM.jpeg', rating: 4.8, reviews: 156, badge: 'best', bestSeller: true },
   // Sketch Art — add your local images to the images/ folder
   { id: 20, name: 'Custom Pencil Sketch Portrait', category: 'Sketch Art', price: 1500, oldPrice: 2000, image: 'images/WhatsApp Image 2026-06-21 at 11.53.11 AM.jpeg', rating: 4.9, reviews: 42, badge: 'new', bestSeller: false, allInclusive: true, customizable: true },
-  { id: 21, name: 'Custom Couple Pencil Sketch', category: 'Sketch Art', price: 1500, oldPrice: 2000, image: 'images/WhatsApp Image 2026-06-21 at 11.53.11 AM.jpeg', rating: 4.8, reviews: 28, badge: '', bestSeller: false, allInclusive: true, customizable: true },
-  { id: 22, name: 'Custom Family Pencil Sketch', category: 'Sketch Art', price: 1500, oldPrice: 2000, image: 'images/WhatsApp Image 2026-06-21 at 11.53.11 AM.jpeg', rating: 4.9, reviews: 35, badge: '', bestSeller: false, allInclusive: true, customizable: true },
   { id: 23, name: 'Custom Blood Art Portrait', category: 'Blood Art', price: 2000, oldPrice: 3000, image: 'images/WhatsApp Image 2026-06-21 at 12.17.46 PM.jpeg', rating: 4.7, reviews: 15, badge: 'new', bestSeller: false, whatsappOnly: true },
   { id: 24, name: 'Custom Blood Art Name Art', category: 'Blood Art', price: 2000, oldPrice: 3000, image: 'images/WhatsApp Image 2026-06-21 at 12.17.46 PM.jpeg', rating: 4.6, reviews: 11, badge: '', bestSeller: false, whatsappOnly: true },
 ];
