@@ -34,20 +34,11 @@ const CONFIG = {
     'Personalized Photo Frames',
     'LED Photo Frames',
     'Acrylic Gifts',
-    'Moon Lamps',
-    'Magic Mirrors',
-    'Photo Mugs',
-    'Cushions',
-    'Photo Clocks',
-    'Crystal Gifts',
     'Keychains',
-    'Name Plates',
-    'Corporate Gifts',
     'Birthday Gifts',
-    'Anniversary Gifts',
     'Wedding Gifts',
     'Bangles',
-    'Sketch Art',
+    'Pencil Art',
     'Blood Art'
   ]
 };

@@ -217,6 +217,19 @@ function handleAdminImage(e) {
   reader.readAsDataURL(file);
 }
 
+function handleOfferImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const preview = document.getElementById('offerImagePreview');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    preview.dataset.imageData = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function addExtraImageRow(url) {
   const container = document.getElementById('extraImagesContainer');
   const row = document.createElement('div');
@@ -662,7 +675,12 @@ function loadOfferForm() {
     document.getElementById('offerPrice').value = saved.price || '';
     document.getElementById('offerOldPrice').value = saved.oldPrice || '';
     document.getElementById('offerStock').value = saved.stock || '';
-    document.getElementById('offerImage').value = saved.image || '';
+    if (saved.image) {
+      const preview = document.getElementById('offerImagePreview');
+      preview.src = saved.image;
+      preview.style.display = 'block';
+      delete preview.dataset.imageData;
+    }
     document.getElementById('offerActive').checked = saved.active !== false;
     if (saved.expiry) document.getElementById('offerExpiry').value = saved.expiry.slice(0, 16);
     calcOfferDiscount();
@@ -689,7 +707,8 @@ async function updateOffer() {
   const price = document.getElementById('offerPrice').value;
   const oldPrice = document.getElementById('offerOldPrice').value;
   const stock = parseInt(document.getElementById('offerStock').value) || 0;
-  const image = document.getElementById('offerImage').value.trim();
+  const offerPreview = document.getElementById('offerImagePreview');
+  const image = offerPreview.dataset.imageData || offerPreview.src || '';
   const active = document.getElementById('offerActive').checked;
   const expiry = document.getElementById('offerExpiry').value;
 
@@ -719,14 +738,19 @@ async function updateOffer() {
 
   try {
     const { data, error } = await supabaseFetch('offers?is_active=eq.true&limit=1&order=created_at.desc');
+    if (error) throw new Error(error);
     if (data && data.length > 0) {
-      await supabaseFetch(`offers?id=eq.${data[0].id}`, { method: 'PATCH', body: JSON.stringify(offerData) });
+      const r = await supabaseFetch(`offers?id=eq.${data[0].id}`, { method: 'PATCH', body: JSON.stringify(offerData) });
+      if (r.error) throw new Error(r.error);
     } else {
-      await supabaseFetch('offers', { method: 'POST', body: JSON.stringify(offerData) });
+      const r = await supabaseFetch('offers', { method: 'POST', body: JSON.stringify(offerData) });
+      if (r.error) throw new Error(r.error);
     }
     document.getElementById('offerSyncStatus').textContent = '✅ Synced to Supabase! Homepage will show this deal.';
   } catch(e) {
-    document.getElementById('offerSyncStatus').textContent = '⚠️ Saved locally. Supabase sync pending (run SQL first).';
+    const errMsg = (e.message || '').slice(0, 150);
+    document.getElementById('offerSyncStatus').textContent = `⚠️ Saved locally. Supabase error: ${errMsg}`;
+    console.error('Offer sync error:', e.message);
   }
 
   renderOfferHistory();
@@ -783,7 +807,12 @@ async function loadActiveOffer() {
     document.getElementById('offerPrice').value = saved.price || '';
     document.getElementById('offerOldPrice').value = saved.oldPrice || '';
     document.getElementById('offerStock').value = saved.stock || '';
-    document.getElementById('offerImage').value = saved.image || '';
+    if (saved.image) {
+      const preview = document.getElementById('offerImagePreview');
+      preview.src = saved.image;
+      preview.style.display = 'block';
+      delete preview.dataset.imageData;
+    }
     calcOfferDiscount();
   }
 }
@@ -938,7 +967,7 @@ function exportData() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '6';
+  const CACHE_VERSION = '7';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
     localStorage.setItem('sasiCacheVersion', CACHE_VERSION);
@@ -963,6 +992,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const preview = document.getElementById('adminImagePreview');
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          preview.dataset.imageData = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+  // Offer upload zone drag/drop
+  const offerZone = document.getElementById('offerUploadZone');
+  if (offerZone) {
+    offerZone.addEventListener('dragover', (e) => { e.preventDefault(); offerZone.style.borderColor = 'var(--primary)'; offerZone.style.background = 'rgba(255,107,0,0.05)'; });
+    offerZone.addEventListener('dragleave', () => { offerZone.style.borderColor = 'var(--gray-200)'; offerZone.style.background = ''; });
+    offerZone.addEventListener('drop', (e) => {
+      e.preventDefault(); offerZone.style.borderColor = 'var(--gray-200)'; offerZone.style.background = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const preview = document.getElementById('offerImagePreview');
           preview.src = e.target.result;
           preview.style.display = 'block';
           preview.dataset.imageData = e.target.result;

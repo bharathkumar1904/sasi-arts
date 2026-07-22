@@ -56,7 +56,7 @@ function renderAll() {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Cache buster — force refresh if sample products changed
-  const CACHE_VERSION = '6';
+  const CACHE_VERSION = '7';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
     localStorage.removeItem('supabaseProducts');
