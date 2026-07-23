@@ -13,13 +13,15 @@ function applyAdminEdits() {
   } catch(e) {}
 }
 
-// ===== STATE MANAGEMENT =====
+function safeGet(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch(e) { return fallback; }
+}
 const state = {
-  cart: JSON.parse(localStorage.getItem('sasiCart') || '[]'),
-  wishlist: JSON.parse(localStorage.getItem('sasiWishlist') || '[]'),
-  wkItems: JSON.parse(localStorage.getItem('sasiWKItems') || '[]'),
-  orders: JSON.parse(localStorage.getItem('sasiOrders') || '[]'),
-  viewedProducts: JSON.parse(localStorage.getItem('sasiRecent') || '[]')
+  cart: safeGet('sasiCart', []),
+  wishlist: safeGet('sasiWishlist', []),
+  wkItems: safeGet('sasiWKItems', []),
+  orders: safeGet('sasiOrders', []),
+  viewedProducts: safeGet('sasiRecent', [])
 };
 
 function saveState(key) {
@@ -206,12 +208,15 @@ function renderShopProducts(products, category) {
 }
 
 function getOfferTotal(item) {
-  if (item.offer && item.offer.qty && item.offer.price && item.qty >= item.offer.qty) {
-    const sets = Math.floor(item.qty / item.offer.qty);
-    const rem = item.qty % item.offer.qty;
-    return sets * item.offer.price + rem * item.price;
+  if (!item) return 0;
+  const price = Number(item.price) || 0;
+  const qty = Number(item.qty) || 0;
+  if (item.offer && item.offer.qty && item.offer.price && qty >= item.offer.qty) {
+    const sets = Math.floor(qty / item.offer.qty);
+    const rem = qty % item.offer.qty;
+    return sets * Number(item.offer.price) + rem * price;
   }
-  return item.price * item.qty;
+  return price * qty;
 }
 
 function renderProductCard(p) {
@@ -934,7 +939,7 @@ function addCustomProduct() {
   const size = document.getElementById('productSize').value;
   const material = document.getElementById('productMaterial').value;
   const img = document.getElementById('previewImage');
-  if (!img.getAttribute('src') || img.getAttribute('src') === window.location.href) {
+  if (!img || !img.getAttribute('src') || img.getAttribute('src') === window.location.href) {
     showToast('Please upload a photo first', 'error');
     return;
   }
@@ -1127,7 +1132,7 @@ function handleSearch(e) {
   const results = document.getElementById('searchResults');
   if (!query) { results.style.display = 'none'; return; }
   const matches = PRODUCTS.filter(p =>
-    p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
+    (p.name && p.name.toLowerCase().includes(query)) || (p.category && p.category.toLowerCase().includes(query))
   );
   if (matches.length === 0) {
     results.innerHTML = '<div style="padding:16px;color:var(--gray-500);text-align:center;">No products found</div>';
@@ -1502,15 +1507,16 @@ async function updateDeliveryCharge(pincode) {
   document.getElementById('delTaxDisplay').textContent = allInclusiveCart ? '₹0 (Included)' : `₹${finalTax.toLocaleString()}`;
 }
 
+function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 async function submitDeliveryAndPay(e) {
   e.preventDefault();
-  const name = document.getElementById('delName').value.trim();
-  const phone = document.getElementById('delPhone').value.trim();
-  const email = document.getElementById('delEmail').value.trim();
-  const address = document.getElementById('delAddress').value.trim();
-  const city = document.getElementById('delCity').value.trim();
-  const pincode = document.getElementById('delPincode').value.trim();
-  const charge = parseInt(document.getElementById('delCharge').value) || 250;
+  const name = val('delName');
+  const phone = val('delPhone');
+  const email = val('delEmail');
+  const address = val('delAddress');
+  const city = val('delCity');
+  const pincode = val('delPincode');
+  const charge = parseInt(val('delCharge'), 10) || 250;
 
   const delState = document.getElementById('delState')?.value.trim();
   if (!name || !phone || !address || !city || !delState || !pincode) {
@@ -1746,13 +1752,15 @@ function setReminder() {
 // ===== NEWSLETTER =====
 function subscribeNewsletter(e) {
   e.preventDefault();
-  const email = document.getElementById('newsletterEmail').value;
-  if (!email) return;
+  const el = document.getElementById('newsletterEmail');
+  const email = el ? el.value.trim() : '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email', 'error'); return; }
   const subs = JSON.parse(localStorage.getItem('sasiNewsletter') || '[]');
+  if (subs.some(s => s.email === email)) { showToast('Already subscribed!', 'error'); return; }
   subs.push({ email, date: new Date().toISOString() });
   localStorage.setItem('sasiNewsletter', JSON.stringify(subs));
-  showToast('Subscribed! Check your email for offers.');
-  document.getElementById('newsletterEmail').value = '';
+  showToast('Subscribed!');
+  if (el) el.value = '';
 }
 
 // ===== ADMIN ACCESS =====

@@ -312,10 +312,10 @@ function getMaterialsList() {
 async function addProduct() {
   const name = document.getElementById('pName').value;
   const category = document.getElementById('pCategory').value;
-  const price = parseInt(document.getElementById('pPrice').value);
-  const oldPrice = parseInt(document.getElementById('pOldPrice').value) || 0;
+  const price = parseInt(document.getElementById('pPrice').value, 10);
+  const oldPrice = parseInt(document.getElementById('pOldPrice').value, 10) || 0;
   const rating = parseFloat(document.getElementById('pRating').value) || 0;
-  const reviewsCount = parseInt(document.getElementById('pReviews').value) || 0;
+  const reviewsCount = parseInt(document.getElementById('pReviews').value, 10) || 0;
   const badge = document.getElementById('pBadge').value;
   const isBestSeller = document.getElementById('pBestSeller').checked;
   const customizable = document.getElementById('pCustomizable').checked;

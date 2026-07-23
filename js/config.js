@@ -39,6 +39,9 @@ const CONFIG = {
     'Wedding Gifts',
     'Bangles',
     'Pencil Art',
-    'Blood Art'
+    'Blood Art',
+    'Moon Lamps',
+    'Photo Mugs',
+    'Corporate Gifts'
   ]
 };
