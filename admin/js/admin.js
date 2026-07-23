@@ -930,7 +930,6 @@ async function renderCorporate() {
 
 // ===== BEST SELLERS =====
 function renderBestsellers() {
-  adminProducts = loadAdminProducts();
   const table = document.getElementById('bestsellerTable');
   if (!table) return;
   table.innerHTML = adminProducts.map(p => {
