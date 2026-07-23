@@ -96,16 +96,20 @@ let adminProducts = [];
 
 async function initAdminProducts() {
   let fresh = [];
-  try { fresh = await loadProductsFromDB(); } catch(e) { console.warn('Supabase fetch failed:', e); }
+  let errMsg = '';
+  try { fresh = await loadProductsFromDB(); } catch(e) { errMsg = e.message; console.warn('Supabase fetch failed:', e); }
   if (fresh && fresh.length) {
+    console.log('Supabase returned', fresh.length, 'products');
     const slim = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
     try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e2) {
       for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e3) {}
+      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e3) { console.warn('Cache save failed:', e3.message); }
     }
+  } else {
+    console.warn('Supabase returned no products or error:', errMsg || 'empty array');
   }
-  // Always use loadAdminProducts which merges all sources
   adminProducts = loadAdminProducts();
+  console.log('Final adminProducts count:', adminProducts.length);
 }
 
 function getLeads() { return JSON.parse(localStorage.getItem('sasiLeads') || '[]'); }
