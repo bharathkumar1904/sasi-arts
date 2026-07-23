@@ -94,21 +94,18 @@ function loadAdminProducts() {
 }
 let adminProducts = [];
 
-let _initialized = false;
 async function initAdminProducts() {
-  if (_initialized) return;
-  _initialized = true;
   let fresh = [];
   try { fresh = await loadProductsFromDB(); } catch(e) { console.warn('Supabase fetch failed:', e); }
   if (fresh && fresh.length) {
-    adminProducts = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
-    try { localStorage.setItem('supabaseProducts', JSON.stringify(adminProducts)); } catch(e2) {
+    const slim = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
+    try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e2) {
       for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-      try { localStorage.setItem('supabaseProducts', JSON.stringify(adminProducts)); } catch(e3) {}
+      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e3) {}
     }
-  } else {
-    adminProducts = loadAdminProducts();
   }
+  // Always use loadAdminProducts which merges all sources
+  adminProducts = loadAdminProducts();
 }
 
 function getLeads() { return JSON.parse(localStorage.getItem('sasiLeads') || '[]'); }
