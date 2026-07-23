@@ -207,7 +207,7 @@ async function renderDashboard() {
 }
 
 // ===== PRODUCTS =====
-function adminImg(src) { return src && src.startsWith('images/') ? '../' + src : src }
+function adminImg(src) { return src ? (src.startsWith('images/') ? '../' + src : src) : '' }
 async function renderProducts() {
   if (!adminProducts.length) {
     if (_initPromise) await _initPromise;
@@ -219,11 +219,11 @@ async function renderProducts() {
     const hasOffer = p.offer && p.offer.qty && p.offer.price;
     return `<tr>
       <td><img src="${adminImg(p.image)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">${imgCount > 1 ? `<span style="display:block;font-size:10px;color:var(--gray-600);text-align:center;">+${imgCount-1} more</span>` : ''}</td>
-      <td>${p.name}</td>
-      <td>${p.category}</td>
-      <td>&#8377;${p.price}${hasOffer ? `<br><span style="font-size:10px;color:#FF6B00;">${p.offer.qty} for ₹${p.offer.price}</span>` : ''}</td>
+      <td>${p.name ?? ''}</td>
+      <td>${p.category ?? ''}</td>
+            <td>&#8377;${p.price ?? 0}${hasOffer ? `<br><span style="font-size:10px;color:#FF6B00;">${p.offer.qty} for ₹${p.offer.price}</span>` : ''}</td>
       <td>${p.oldPrice ? '&#8377;'+p.oldPrice : '-'}</td>
-      <td>${'★'.repeat(Math.floor(p.rating))}</td>
+      <td>${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}</td>
       <td style="font-size:11px;">${hasOptions ? '<span style="color:#22C55E;">✓ Options</span>' : '-'}</td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
@@ -368,8 +368,18 @@ async function addProduct() {
   }
   const finalId = dbId || Date.now();
   adminProducts.push({ ...newProduct, id: finalId, oldPrice, reviews: reviewsCount, bestSeller: isBestSeller, db_id: dbId });
-  localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
-  renderProducts();
+  const msg = supabaseError
+    ? 'Saved locally. Supabase sync failed: ' + (supabaseErrorMsg || 'unknown error')
+    : 'Product added successfully' + (dbId ? ' & synced to Supabase!' : '!');
+  const isErr = supabaseError;
+  try { localStorage.setItem('adminProducts', JSON.stringify(adminProducts)); } catch(e) {
+    adminProducts.pop();
+    showToast('Failed to save: ' + e.message, 'error');
+    return;
+  }
+  try { await renderProducts(); } catch(e) {
+    document.getElementById('productTable').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#FF4444;">Render error: ' + e.message + '</td></tr>';
+  }
   hideAddProduct();
   document.getElementById('pName').value = '';
   document.getElementById('pPrice').value = '';
@@ -377,11 +387,7 @@ async function addProduct() {
   preview.src = '';
   preview.style.display = 'none';
   delete preview.dataset.imageData;
-  if (supabaseError) {
-    showToast('Saved locally. Supabase sync failed: ' + (supabaseErrorMsg || 'unknown error'), 'error');
-  } else {
-    showToast('Product added successfully' + (dbId ? ' & synced to Supabase!' : '!'));
-  }
+  try { showToast(msg, isErr ? 'error' : 'success'); } catch(e) { alert(msg); }
 }
 async function editProduct(id) {
   const p = adminProducts.find(x => x.id === id);
