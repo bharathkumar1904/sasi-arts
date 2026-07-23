@@ -126,7 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Admin edits win over Supabase
       applyAdminEdits();
       // Save to a separate cache for admin panel view
-      localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS));
+      try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e) {
+        for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
+        try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); }
+      }
       renderAll();
       // Re-render shop page if it's currently open (so Supabase products appear immediately)
       const shopPage = document.getElementById('shop-page');
@@ -523,7 +526,7 @@ function builderBackToProducts() {
 let currentModalProduct = null;
 let modalPhotosData = [];
 
-const DEFAULT_SIZES = ['Small (6x4)', 'Medium (8x6)', 'Large (12x8)'];
+const DEFAULT_SIZES = ['Large (12x8)'];
 const DEFAULT_MATERIALS = ['Premium Wood', 'Acrylic', 'Metal', 'LED Backlit'];
 
 function populateProductOptions(p, sizeSelectId, materialSelectId) {

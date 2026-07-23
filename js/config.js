@@ -35,13 +35,9 @@ const CONFIG = {
     'LED Photo Frames',
     'Acrylic Gifts',
     'Keychains',
-    'Birthday Gifts',
     'Wedding Gifts',
     'Bangles',
     'Pencil Art',
-    'Blood Art',
-    'Moon Lamps',
-    'Photo Mugs',
-    'Corporate Gifts'
+    'Blood Art'
   ]
 };
