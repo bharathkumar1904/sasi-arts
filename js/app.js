@@ -23,7 +23,28 @@ const state = {
 };
 
 function saveState(key) {
-  localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
+  try {
+    localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      console.warn('localStorage full. Auto-cleaning old cache...');
+      const keep = new Set(['sasiCart','sasiWishlist','sasiOrders','sasiWKItems','sasiRecent','sasiCurrentOffer','sasiCacheVersion','adminProducts','supabaseProducts']);
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (!keep.has(k)) localStorage.removeItem(k);
+      }
+      // Clear biggest cached data as last resort
+      localStorage.removeItem('supabaseProducts');
+      localStorage.removeItem('adminProducts');
+      try {
+        localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
+      } catch(e2) {
+        showToast('Storage full. Clear browser data.', 'error');
+      }
+    } else {
+      console.warn('saveState error:', e);
+    }
+  }
 }
 
 // ===== TOAST =====
@@ -491,7 +512,7 @@ function builderBackToProducts() {
 
 // ===== PRODUCT DETAIL MODAL =====
 let currentModalProduct = null;
-let modalPhotoData = null;
+let modalPhotosData = [];
 
 const DEFAULT_SIZES = ['Small (6x4)', 'Medium (8x6)', 'Large (12x8)'];
 const DEFAULT_MATERIALS = ['Premium Wood', 'Acrylic', 'Metal', 'LED Backlit'];
@@ -513,8 +534,8 @@ async function openProductModal(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
   currentModalProduct = p;
-  modalPhotoData = null;
-  reviewRating = 0;
+  modalPhotosData = [];
+  document.getElementById('modalUploadedThumbs').innerHTML = '';
   resetReviewStars();
   document.getElementById('modalProductImage').src = p.image;
   // Populate image thumbnails
@@ -580,47 +601,71 @@ function closeProductModal() {
   document.getElementById('productModal').style.display = 'none';
   document.body.style.overflow = '';
   currentModalProduct = null;
-  modalPhotoData = null;
+  modalPhotosData = [];
+  document.getElementById('modalUploadedThumbs').innerHTML = '';
 }
 
 async function handleModalPhoto(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Max 10MB', 'error'); return; }
-  // Show preview immediately
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('modalProductImage').src = ev.target.result;
-    modalPhotoData = ev.target.result;
-    showToast('Photo added! Uploading to cloud...');
-  };
-  reader.readAsDataURL(file);
-  // Upload to Supabase Storage
-  const ext = file.name.split('.').pop() || 'jpg';
-  const filePath = generateFilePath('uploads', ext);
-  const { url, error } = await uploadImage('products', filePath, file);
-  if (url) {
-    modalPhotoData = url;
-    document.getElementById('modalProductImage').src = url;
-    showToast('Photo uploaded! Customize and order.');
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  e.target.value = '';
+  for (const file of files) {
+    if (file.size > 10 * 1024 * 1024) { showToast(file.name + ' exceeds 10MB limit, skipped.', 'error'); continue; }
+    // Show local preview immediately
+    const reader = new FileReader();
+    const previewUrl = await new Promise(resolve => { reader.onload = ev => resolve(ev.target.result); reader.readAsDataURL(file); });
+    addModalPhotoThumb(previewUrl);
+    // Upload to Supabase
+    const ext = file.name.split('.').pop() || 'jpg';
+    const filePath = generateFilePath('uploads', ext);
+    const { url, error } = await uploadImage('products', filePath, file);
+    if (url) {
+      modalPhotosData.push(url);
+      document.getElementById('modalProductImage').src = url;
+      replaceModalPhotoThumb(previewUrl, url);
+      showToast(file.name + ' uploaded!');
+    }
   }
+  if (modalPhotosData.length) showToast(modalPhotosData.length + ' photo(s) uploaded!');
+}
+
+function addModalPhotoThumb(src) {
+  const c = document.getElementById('modalUploadedThumbs');
+  const div = document.createElement('div');
+  div.className = 'modal-photo-thumb';
+  div.style.cssText = 'width:56px;height:56px;border-radius:8px;overflow:hidden;border:2px solid var(--primary);position:relative;flex-shrink:0;';
+  div.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;"><button type="button" onclick="removeModalPhoto(this.parentElement)" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#ff4444;color:#fff;border:none;font-size:11px;line-height:18px;text-align:center;cursor:pointer;">×</button>`;
+  c.appendChild(div);
+}
+
+function replaceModalPhotoThumb(oldSrc, newSrc) {
+  document.querySelectorAll('#modalUploadedThumbs img').forEach(img => { if (img.src === oldSrc) img.src = newSrc; });
+}
+
+function removeModalPhoto(el) {
+  const src = el.querySelector('img')?.src;
+  modalPhotosData = modalPhotosData.filter(u => u !== src);
+  el.remove();
+  const first = modalPhotosData[0] || document.querySelector('#modalThumbnails img')?.src || '';
+  if (first) document.getElementById('modalProductImage').src = first;
 }
 
 function addModalToCart() {
   if (!currentModalProduct) return;
   const p = currentModalProduct;
-  const imgSrc = modalPhotoData || p.image;
+  const imgs = modalPhotosData.length ? modalPhotosData : [p.image];
   const item = {
     ...p,
     qty: 1,
     custom: true,
+    images: imgs,
+    image: imgs[0],
     customization: {
       text: document.getElementById('modalCustomText').value || 'No text',
       size: document.getElementById('modalSize').value,
       material: document.getElementById('modalMaterial').value,
-      photo: imgSrc
-    },
-    image: imgSrc
+      photos: imgs
+    }
   };
   state.cart.push(item);
   saveState('cart');
@@ -693,6 +738,7 @@ function orderViaWhatsApp() {
   const text = document.getElementById('modalCustomText').value || 'No text';
   const size = document.getElementById('modalSize').value;
   const material = document.getElementById('modalMaterial').value;
+  const photoCount = modalPhotosData.length;
   const msg = `Hi Sasi Arts! I want to order:
 *Product:* ${p.name}
 *Price:* ₹${p.price}
@@ -700,7 +746,7 @@ function orderViaWhatsApp() {
 *Custom Text:* ${text}
 *Size:* ${size}
 *Material:* ${material}
-*Photo:* ${modalPhotoData ? 'Yes (uploaded)' : 'Use default image'}
+*Photos:* ${photoCount ? photoCount + ' uploaded' : 'Use default image'}
 Please confirm the order.`;
   window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
   closeProductModal();
@@ -985,7 +1031,7 @@ function updateCartUI() {
         <img src="${item.image}" alt="${item.name}">
         <div class="details">
           <div class="name">${item.name}${offerTag}</div>
-          ${item.customization ? `<div style="font-size:12px;color:var(--gray-500);">${item.customization.material} | ${item.customization.size}</div>` : ''}
+          ${item.customization ? `<div style="font-size:12px;color:var(--gray-500);">${item.customization.material} | ${item.customization.size}${(item.images||[]).length > 1 ? ' | 📸 ' + item.images.length + ' photos' : ''}</div>` : ''}
           <div class="price">&#8377;${total.toLocaleString()}</div>
           <div class="qty">
             <button onclick="updateQty(${item.id}, -1)">-</button>
@@ -1543,7 +1589,7 @@ async function submitDeliveryAndPay(e) {
           product_price: item.price,
           quantity: item.qty || 1,
           customization: item.customization ? JSON.stringify(item.customization) : null,
-          image: item.image || ''
+          image: (item.images && item.images[0]) || item.image || ''
         }));
         // Save to Supabase first (with items together)
         try {

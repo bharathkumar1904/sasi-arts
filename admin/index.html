@@ -326,9 +326,10 @@
   </div><!-- /adminPanel -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/config.js?v=19"></script>
-  <script src="../js/data.js?v=19"></script>
-  <script src="../js/supabase.js?v=19"></script>
-  <script src="js/admin.js?v=19"></script>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister()));</script>
+  <script src="../js/config.js?v=22"></script>
+  <script src="../js/data.js?v=22"></script>
+  <script src="../js/supabase.js?v=22"></script>
+  <script src="js/admin.js?v=22"></script>
 </body>
 </html>

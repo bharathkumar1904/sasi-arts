@@ -8,12 +8,12 @@
   <meta name="keywords" content="personalized gifts, photo frames, custom gifts, LED frames, acrylic gifts, moon lamps, magic mirrors, photo mugs">
   <meta name="geo.region" content="IN-AP">
   <meta name="geo.placename" content="Rajanagaram">
-  <link rel="canonical" href="https://sasiarts.in">
+  <link rel="canonical" href="https://sasiarts.website">
   <meta property="og:title" content="Sasi Arts & Photo Frames | Personalized Gifts">
   <meta property="og:description" content="Create beautiful personalized gifts for your loved ones. Premium quality custom photo frames, LED frames, and more.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://sasiarts.in">
-  <meta property="og:image" content="https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?w=1200">
+  <meta property="og:url" content="https://sasiarts.website">
+  <meta property="og:image" content="https://sasiarts.website/images/WhatsApp%20Image%202026-07-22%20at%208.29.52%20PM.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -693,11 +693,12 @@
         <div>
           <img id="modalProductImage" src="" style="width:100%;border-radius:var(--radius-lg);aspect-ratio:1;object-fit:cover;">
           <div id="modalThumbnails" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;"></div>
-          <div style="margin-top:12px;border:2px dashed var(--gray-300);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('modalPhotoInput').click()">
+          <div id="modalUploadZone" style="margin-top:12px;border:2px dashed var(--gray-300);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;" onclick="document.getElementById('modalPhotoInput').click()">
             <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--primary);display:block;margin-bottom:4px;"></i>
-            <small style="color:var(--gray-500);">Upload your photo to customize</small>
+            <small style="color:var(--gray-500);">Upload your photos (select multiple)</small>
           </div>
-          <input type="file" id="modalPhotoInput" accept="image/*" style="display:none" onchange="handleModalPhoto(event)">
+          <div id="modalUploadedThumbs" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;"></div>
+          <input type="file" id="modalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleModalPhoto(event)">
         </div>
         <div>
           <span id="modalCategory" style="font-size:12px;color:var(--primary);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;"></span>
@@ -781,10 +782,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="js/config.js?v=21"></script>
-  <script src="js/data.js?v=21"></script>
-  <script src="js/supabase.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister()));</script>
+  <script src="js/config.js?v=22"></script>
+  <script src="js/data.js?v=22"></script>
+  <script src="js/supabase.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
   <script>
 (function(){function r(){let e=document.querySelector('#__vercel_toolbar,vercel-toolbar,[id*="vercel-toolbar"]');if(e){e.style.display='none';try{if(e.shadowRoot)e.shadowRoot.querySelector('button')&&(e.shadowRoot.querySelector('button').style.display='none')}catch(ex){}}}new MutationObserver(r).observe(document.documentElement,{childList:!0,subtree:!0,attributes:!0});setInterval(r,500)})();
   </script>

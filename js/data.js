@@ -1,5 +1,5 @@
 function dataHash() {
-  let s = JSON.stringify(SAMPLE_PRODUCTS.map(p => [p.id, p.name, p.price, p.oldPrice, p.image, p.badge, p.bestSeller, p.is_active]));
+  let s = 'c2|' + JSON.stringify(SAMPLE_PRODUCTS.map(p => [p.id, p.name, p.price, p.oldPrice, p.image, p.badge, p.bestSeller, p.is_active]));
   let h = 0; for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
   return 'd' + Math.abs(h).toString(36);
 }

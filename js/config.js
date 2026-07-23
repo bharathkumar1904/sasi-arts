@@ -14,7 +14,7 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiamdpaXpyZmRqaHJjY2dzZGJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NTY2NTMsImV4cCI6MjA5NzEzMjY1M30.SUVAmTBDvdo4pfGFOWQlMNxOOndgRnTH8N06t0xYbbg',
 
   RAZORPAY_KEY_ID: 'rzp_live_T3ue2C0zo4i9Tl',
-  SITE_URL: 'https://sasiarts.in',
+  SITE_URL: 'https://sasiarts.website',
   CURRENCY: '₹',
   FREE_SHIPPING_ABOVE: 499,
   SHIPPING_CHARGE: 50,
@@ -22,7 +22,7 @@ const CONFIG = {
   DELIVERY_ESTIMATE: '3-5 business days',
   BASE_LOCATION: 'Rajanagaram',
   BASE_PINCODE: 533294,
-  API_BASE_URL: 'https://sasi-arts.vercel.app', // Change to your actual domain
+  API_BASE_URL: 'https://sasiarts.website',
   DELHIVERY_API_URL: 'https://track.delhivery.com',
   // ADMIN_PASSWORD_HASH removed — Supabase Auth handles login
   ADMIN_EMAIL: 'sodasanisasi387@gmail.com',

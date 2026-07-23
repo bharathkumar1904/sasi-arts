@@ -484,7 +484,7 @@ function normalizeItem(i) {
   const price = i.product_price || i.price || 0;
   let cust = i.customization;
   if (typeof cust === 'string') { try { cust = JSON.parse(cust); } catch(e) { cust = null; } }
-  return { name, qty, price, customization: cust || {}, image: i.image || (cust && cust.photo) || '' };
+  return { name, qty, price, customization: cust || {}, image: i.image || (cust && (cust.photos ? cust.photos[0] : cust.photo)) || '' };
 }
 
 function openImage(src) {
@@ -520,16 +520,21 @@ function viewOrderBill(id) {
   const date = new Date(order.created_at || order.date).toLocaleString('en-IN');
   const itemsHtml = items.length ? items.map(i => {
     const cust = i.customization || {};
-    // Photo can be in cust.photo (modal flow) or i.image (builder flow)
-    const userPhoto = (cust.photo || i.image) && !((cust.photo || i.image) || '').includes('unsplash') && !((cust.photo || i.image) || '').includes('images.unsplash') ? (cust.photo || i.image) : null;
-    const willShow = [cust.size, cust.material, cust.font, (cust.text && cust.text !== 'No text') ? 'x' : null, userPhoto].filter(Boolean);
+    // Photos can be in cust.photos (array, modal flow), cust.photo (single, legacy), or i.image (builder flow)
+    const userPhotos = (Array.isArray(cust.photos) && cust.photos.length) ? cust.photos : [];
+    if (cust.photo && !userPhotos.includes(cust.photo)) userPhotos.push(cust.photo);
+    if (i.image && !userPhotos.includes(i.image) && !i.image.includes('unsplash')) userPhotos.push(i.image);
+    const willShow = [cust.size, cust.material, cust.font, (cust.text && cust.text !== 'No text') ? 'x' : null, userPhotos.length ? '📸' : null].filter(Boolean);
+    const photoHtml = userPhotos.length ? userPhotos.map((url, pi) =>
+      `<img src="${url}" style="max-width:120px;max-height:120px;border-radius:4px;margin:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;vertical-align:top;" onclick="openImage(this.src)" title="Click to view larger"><button onclick="downloadImage('${url}','photo-${order.id}-${pi}')" style="display:block;margin:0 auto 4px;padding:2px 8px;background:#1A1A2E;color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer;">Download</button>`
+    ).join('') : '';
     const custDetails = willShow.length ? `
       <div style="margin-top:6px;font-size:12px;color:#555;background:#f9f9f9;padding:8px 10px;border-radius:6px;border-left:3px solid #1A1A2E;">
         ${cust.size ? `<div><strong>Size:</strong> ${cust.size}</div>` : ''}
         ${cust.material ? `<div><strong>Material:</strong> ${cust.material}</div>` : ''}
         ${cust.font ? `<div><strong>Font:</strong> ${cust.font}</div>` : ''}
         ${cust.text && cust.text !== 'No text' ? `<div><strong>Text:</strong> "${cust.text}"</div>` : ''}
-        ${userPhoto ? `<div style="margin-top:4px;"><strong>Customer Photo:</strong><br><img src="${userPhoto}" style="max-width:150px;max-height:150px;border-radius:4px;margin-top:4px;object-fit:cover;border:1px solid #ddd;cursor:pointer;" onclick="openImage(this.src)" title="Click to view larger"></div><button onclick="downloadImage(this.previousElementSibling.querySelector('img').src,'customer-photo-${order.id}')" style="margin-top:4px;padding:4px 12px;background:#1A1A2E;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;">Download Photo</button>` : ''}
+        ${userPhotos.length ? `<div style="margin-top:4px;"><strong>Customer Photos (${userPhotos.length}):</strong><br>${photoHtml}</div>` : ''}
       </div>` : '';
     const imagePreview = i.image && !i.image.startsWith('data:') && !i.image.includes('unsplash') ?
       `<img src="${i.image}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:6px;">` : '';
