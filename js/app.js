@@ -27,15 +27,19 @@ function saveState(key) {
     localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
-      console.warn('localStorage full. Auto-cleaning old cache...');
-      const keep = new Set(['sasiCart','sasiWishlist','sasiOrders','sasiWKItems','sasiRecent','sasiCurrentOffer','sasiCacheVersion','adminProducts','supabaseProducts']);
+      console.warn('localStorage full. Auto-cleaning...');
+      // Step 1: remove junk keys
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const k = localStorage.key(i);
-        if (!keep.has(k)) localStorage.removeItem(k);
+        if (k && !k.startsWith('sasi')) localStorage.removeItem(k);
       }
-      // Clear biggest cached data as last resort
       localStorage.removeItem('supabaseProducts');
       localStorage.removeItem('adminProducts');
+      // Step 2: trim orders to last 10 (they hold image data)
+      if (state.orders && state.orders.length > 10) {
+        state.orders = state.orders.slice(-10);
+        try { localStorage.setItem('sasiOrders', JSON.stringify(state.orders)); } catch(e3) {}
+      }
       try {
         localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
       } catch(e2) {
