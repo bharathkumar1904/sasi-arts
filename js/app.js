@@ -926,20 +926,23 @@ function addCustomToWhatsApp() {
 }
 
 function addDealToCart() {
+  const saved = JSON.parse(localStorage.getItem('sasiCurrentOffer') || '{}');
   const dealProduct = {
     id: 999,
-    name: "Today's Special - Premium LED Photo Frame",
-    category: 'LED Photo Frames',
-    price: 899,
-    oldPrice: 1499,
+    name: saved.title || "Today's Special - Premium LED Photo Frame",
+    category: saved.category || 'LED Photo Frames',
+    price: parseInt(saved.price || saved.offer_price) || 899,
+    oldPrice: parseInt(saved.oldPrice || saved.old_price) || 1499,
     image: document.getElementById('dealImage').src,
-    custom: false,
-    qty: 1
+    customizable: true,
+    badge: 'offer',
+    rating: 4.9,
+    reviews: 87
   };
-  state.cart.push(dealProduct);
-  saveState('cart');
-  updateCartUI();
-  showToast('Deal added to cart!');
+  const idx = PRODUCTS.findIndex(p => p.id === 999);
+  if (idx >= 0) PRODUCTS[idx] = dealProduct;
+  else PRODUCTS.push(dealProduct);
+  openProductModal(999);
 }
 
 function removeFromCart(id) {
