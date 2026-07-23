@@ -94,27 +94,21 @@ function loadAdminProducts() {
 }
 let adminProducts = [];
 
+let _initialized = false;
 async function initAdminProducts() {
+  if (_initialized) return;
+  _initialized = true;
   let fresh = [];
   try { fresh = await loadProductsFromDB(); } catch(e) { console.warn('Supabase fetch failed:', e); }
   if (fresh && fresh.length) {
-    const slim = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
-    try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e2) {
+    adminProducts = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
+    try { localStorage.setItem('supabaseProducts', JSON.stringify(adminProducts)); } catch(e2) {
       for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e3) {}
+      try { localStorage.setItem('supabaseProducts', JSON.stringify(adminProducts)); } catch(e3) {}
     }
-    // Merge fresh Supabase products into adminProducts directly
-    const deleted = new Set(JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => p._deleted).map(p => p.id));
-    const map = new Map(adminProducts.map(p => [p.id, p]));
-    slim.filter(p => !deleted.has(p.id)).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
-    adminProducts = Array.from(map.values());
   } else {
-    // Fall back to cached
     adminProducts = loadAdminProducts();
   }
-  const tbl = document.querySelector('#productTable');
-  if (tbl) renderProducts();
-  if (document.querySelector('#tab-dashboard.active')) renderDashboard();
 }
 
 function getLeads() { return JSON.parse(localStorage.getItem('sasiLeads') || '[]'); }
@@ -198,9 +192,8 @@ async function renderDashboard() {
 
 // ===== PRODUCTS =====
 function adminImg(src) { return src && src.startsWith('images/') ? '../' + src : src }
-async function renderProducts() {
-  if (!adminProducts.length) { await initAdminProducts(); }
-  else { adminProducts = loadAdminProducts(); }
+function renderProducts() {
+  if (!adminProducts.length) adminProducts = loadAdminProducts();
   document.getElementById('productTable').innerHTML = adminProducts.map(p => {
     const imgCount = (p.images && p.images.length) || 1;
     const hasOptions = (p.sizes && p.sizes.length) || (p.materials && p.materials.length);
