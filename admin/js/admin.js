@@ -95,15 +95,18 @@ function loadAdminProducts() {
 let adminProducts = [];
 
 async function initAdminProducts() {
-  const cached = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
-  if (!cached.length) {
-    try {
-      const dbProducts = await loadProductsFromDB();
-      if (dbProducts && dbProducts.length) {
-        const mapped = dbProducts.map(p => ({ ...p, oldPrice: p.old_price || p.oldPrice, bestSeller: p.is_best_seller === true }));
-        localStorage.setItem('supabaseProducts', JSON.stringify(mapped));
-      }
-    } catch(e) { console.warn('Direct Supabase product fetch failed:', e); }
+  try {
+    const dbProducts = await loadProductsFromDB();
+    if (dbProducts && dbProducts.length) {
+      const mapped = dbProducts.map(p => ({ ...p, oldPrice: p.old_price || p.oldPrice, bestSeller: p.is_best_seller === true }));
+      localStorage.setItem('supabaseProducts', JSON.stringify(mapped));
+    } else {
+      showToast('No products found in Supabase', 'error');
+    }
+  } catch(e) {
+    console.warn('Supabase fetch failed, using cached:', e);
+    const cached = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
+    if (!cached.length) showToast('Could not load Supabase products: ' + e.message, 'error');
   }
   adminProducts = loadAdminProducts();
   const active = document.querySelector('#productTable');
@@ -993,6 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const CACHE_VERSION = typeof dataHash === 'function' ? dataHash() : '7';
   if (localStorage.getItem('sasiCacheVersion') !== CACHE_VERSION) {
     localStorage.removeItem('adminProducts');
+    localStorage.removeItem('supabaseProducts');
     localStorage.setItem('sasiCacheVersion', CACHE_VERSION);
   }
   // Populate product category dropdown

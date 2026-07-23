@@ -50,8 +50,8 @@ async function supabaseFetch(path, options = {}) {
 // ===== PRODUCTS =====
 async function loadProductsFromDB() {
   const { data, error } = await supabaseFetch('products?select=*&order=created_at.desc');
-  if (data && data.length > 0) return data;
-  return null;
+  if (error) throw new Error(error);
+  return data || [];
 }
 
 async function saveProductToDB(product) {
