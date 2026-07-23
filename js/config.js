@@ -22,7 +22,7 @@ const CONFIG = {
   DELIVERY_ESTIMATE: '3-5 business days',
   BASE_LOCATION: 'Rajanagaram',
   BASE_PINCODE: 533294,
-  API_BASE_URL: 'https://sasiarts.website',
+  API_BASE_URL: 'https://sasi-arts.vercel.app', // Fallback for fetchApi — custom domain DNS may not be propagated yet
   DELHIVERY_API_URL: 'https://track.delhivery.com',
   // ADMIN_PASSWORD_HASH removed — Supabase Auth handles login
   ADMIN_EMAIL: 'sodasanisasi387@gmail.com',
