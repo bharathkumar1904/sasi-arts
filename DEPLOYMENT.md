@@ -32,7 +32,7 @@
 SUPABASE_URL: 'https://your-project.supabase.co',
 SUPABASE_ANON_KEY: 'your-anon-key',
 RAZORPAY_KEY_ID: 'rzp_live_your_key',
-SITE_URL: 'https://sasiarts.in'
+SITE_URL: 'https://sasiarts.website'
 ```
 
 ### 5. WhatsApp Integration

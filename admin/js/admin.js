@@ -64,6 +64,7 @@ async function checkAdminAuth() {
 function showAdminPanel() {
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('adminPanel').style.display = 'block';
+  initAdminProducts();
   renderDashboard();
 }
 
@@ -83,7 +84,6 @@ function adminLogout() {
 
 // ===== ADMIN STATE =====
 function loadAdminProducts() {
-  // SAMPLE_PRODUCTS base > supabaseProducts > adminProducts (admin edits win)
   const fromCache = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
   const fromEdits = JSON.parse(localStorage.getItem('adminProducts') || '[]');
   const deletedIds = new Set(fromEdits.filter(p => p._deleted).map(p => p.id));
@@ -92,7 +92,24 @@ function loadAdminProducts() {
   fromEdits.filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
   return Array.from(map.values());
 }
-let adminProducts = loadAdminProducts();
+let adminProducts = [];
+
+async function initAdminProducts() {
+  const cached = JSON.parse(localStorage.getItem('supabaseProducts') || '[]');
+  if (!cached.length) {
+    try {
+      const dbProducts = await loadProductsFromDB();
+      if (dbProducts && dbProducts.length) {
+        const mapped = dbProducts.map(p => ({ ...p, oldPrice: p.old_price || p.oldPrice, bestSeller: p.is_best_seller === true }));
+        localStorage.setItem('supabaseProducts', JSON.stringify(mapped));
+      }
+    } catch(e) { console.warn('Direct Supabase product fetch failed:', e); }
+  }
+  adminProducts = loadAdminProducts();
+  const active = document.querySelector('#productTable');
+  if (active) renderProducts();
+  if (document.querySelector('#tab-dashboard.active')) renderDashboard();
+}
 
 function getLeads() { return JSON.parse(localStorage.getItem('sasiLeads') || '[]'); }
 function getOrders() { return JSON.parse(localStorage.getItem('sasiOrders') || '[]'); }
@@ -175,8 +192,9 @@ async function renderDashboard() {
 
 // ===== PRODUCTS =====
 function adminImg(src) { return src && src.startsWith('images/') ? '../' + src : src }
-function renderProducts() {
-  adminProducts = loadAdminProducts();
+async function renderProducts() {
+  if (!adminProducts.length) { await initAdminProducts(); }
+  else { adminProducts = loadAdminProducts(); }
   document.getElementById('productTable').innerHTML = adminProducts.map(p => {
     const imgCount = (p.images && p.images.length) || 1;
     const hasOptions = (p.sizes && p.sizes.length) || (p.materials && p.materials.length);
@@ -845,9 +863,9 @@ function sendCampaign(type) {
     promo: '🏷️ Promotional Offer Campaign'
   };
   const messages = {
-    birthday: `Hi! 🎂 Happy Birthday from Sasi Arts! Enjoy special birthday discounts on personalized gifts. Visit sasiarts.in to explore! 🎁`,
+    birthday: `Hi! 🎂 Happy Birthday from Sasi Arts! Enjoy special birthday discounts on personalized gifts. Visit sasiarts.website to explore! 🎁`,
     festival: `🎉 Wishing you a wonderful festive season! Sasi Arts has exclusive festive offers on customized gifts. Check them out at sasiarts.in ✨`,
-    promo: `🏷️ Special Offer from Sasi Arts! Get flat discounts on personalized photo frames, LED frames & more. Shop now at sasiarts.in ❤️`
+    promo: `🏷️ Special Offer from Sasi Arts! Get flat discounts on personalized photo frames, LED frames & more. Shop now at sasiarts.website ❤️`
   };
   const campaign = {
     name: names[type] || 'Campaign',

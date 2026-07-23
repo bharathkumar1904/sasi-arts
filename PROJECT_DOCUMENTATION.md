@@ -845,7 +845,7 @@ Storage:   Supabase Storage (product images, user uploads)
 Payments:  Razorpay (card/UPI/netbanking)
 Email:     EmailJS
 Hosting:   Vercel (static + serverless + CDN)
-Domain:    sasiarts.in
+Domain:    sasiarts.website
 ```
 
 ### Card 2: Request Flow
