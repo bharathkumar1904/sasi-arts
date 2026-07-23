@@ -101,9 +101,22 @@ async function initAdminProducts() {
   if (fresh && fresh.length) {
     console.log('Supabase returned', fresh.length, 'products');
     const slim = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
+    // Try to cache; merge into adminProducts either way
+    let cached = true;
     try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e2) {
+      cached = false;
       for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e3) { console.warn('Cache save failed:', e3.message); }
+      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); cached = true; } catch(e3) { console.warn('Cache full, using in-memory only'); }
+    }
+    if (!cached) {
+      // Cache failed — merge Supabase products into adminProducts in-memory
+      const deleted = new Set(JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => p._deleted).map(p => p.id));
+      const map = new Map(SAMPLE_PRODUCTS.filter(p => !deleted.has(p.id)).map(p => [p.id, { ...p }]));
+      slim.filter(p => !deleted.has(p.id)).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+      JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+      adminProducts = Array.from(map.values());
+      console.log('Merged', adminProducts.length, 'products in-memory (cache was full)');
+      return;
     }
   } else {
     console.warn('Supabase returned no products or error:', errMsg || 'empty array');
