@@ -93,36 +93,38 @@ function loadAdminProducts() {
   return Array.from(map.values());
 }
 let adminProducts = [];
+let _initPromise = null;
 
 async function initAdminProducts() {
-  let fresh = [];
-  let errMsg = '';
-  try { fresh = await loadProductsFromDB(); } catch(e) { errMsg = e.message; console.warn('Supabase fetch failed:', e); }
-  if (fresh && fresh.length) {
-    console.log('Supabase returned', fresh.length, 'products');
-    const slim = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
-    // Try to cache; merge into adminProducts either way
-    let cached = true;
-    try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e2) {
-      cached = false;
-      for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); cached = true; } catch(e3) { console.warn('Cache full, using in-memory only'); }
+  _initPromise = (async () => {
+    let fresh = [];
+    let errMsg = '';
+    try { fresh = await loadProductsFromDB(); } catch(e) { errMsg = e.message; console.warn('Supabase fetch failed:', e); }
+    if (fresh && fresh.length) {
+      console.log('Supabase returned', fresh.length, 'products');
+      const slim = fresh.map(p => ({ id: p.id, name: p.name, category: p.category, price: p.price, oldPrice: p.old_price || p.oldPrice, image: p.image, images: p.images, rating: p.rating, reviews: p.reviews_count || p.reviews, badge: p.badge, bestSeller: p.is_best_seller === true, is_active: p.is_active !== false, sizes: p.sizes, materials: p.materials, offer: p.offer, customizable: p.customizable, allInclusive: p.allInclusive, whatsappOnly: p.whatsappOnly }));
+      let cached = true;
+      try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); } catch(e2) {
+        cached = false;
+        for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
+        try { localStorage.setItem('supabaseProducts', JSON.stringify(slim)); cached = true; } catch(e3) { console.warn('Cache full, using in-memory only'); }
+      }
+      if (!cached) {
+        const deleted = new Set(JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => p._deleted).map(p => p.id));
+        const map = new Map(SAMPLE_PRODUCTS.filter(p => !deleted.has(p.id)).map(p => [p.id, { ...p }]));
+        slim.filter(p => !deleted.has(p.id)).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+        JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
+        adminProducts = Array.from(map.values());
+        console.log('Merged', adminProducts.length, 'products in-memory (cache was full)');
+        return;
+      }
+    } else {
+      console.warn('Supabase returned no products or error:', errMsg || 'empty array');
     }
-    if (!cached) {
-      // Cache failed — merge Supabase products into adminProducts in-memory
-      const deleted = new Set(JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => p._deleted).map(p => p.id));
-      const map = new Map(SAMPLE_PRODUCTS.filter(p => !deleted.has(p.id)).map(p => [p.id, { ...p }]));
-      slim.filter(p => !deleted.has(p.id)).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
-      JSON.parse(localStorage.getItem('adminProducts') || '[]').filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
-      adminProducts = Array.from(map.values());
-      console.log('Merged', adminProducts.length, 'products in-memory (cache was full)');
-      return;
-    }
-  } else {
-    console.warn('Supabase returned no products or error:', errMsg || 'empty array');
-  }
-  adminProducts = loadAdminProducts();
-  console.log('Final adminProducts count:', adminProducts.length);
+    adminProducts = loadAdminProducts();
+    console.log('Final adminProducts count:', adminProducts.length);
+  })();
+  return _initPromise;
 }
 
 function getLeads() { return JSON.parse(localStorage.getItem('sasiLeads') || '[]'); }
@@ -206,8 +208,11 @@ async function renderDashboard() {
 
 // ===== PRODUCTS =====
 function adminImg(src) { return src && src.startsWith('images/') ? '../' + src : src }
-function renderProducts() {
-  if (!adminProducts.length) adminProducts = loadAdminProducts();
+async function renderProducts() {
+  if (!adminProducts.length) {
+    if (_initPromise) await _initPromise;
+    else adminProducts = loadAdminProducts();
+  }
   document.getElementById('productTable').innerHTML = adminProducts.map(p => {
     const imgCount = (p.images && p.images.length) || 1;
     const hasOptions = (p.sizes && p.sizes.length) || (p.materials && p.materials.length);
@@ -943,7 +948,8 @@ async function renderCorporate() {
 }
 
 // ===== BEST SELLERS =====
-function renderBestsellers() {
+async function renderBestsellers() {
+  if (!adminProducts.length && _initPromise) await _initPromise;
   const table = document.getElementById('bestsellerTable');
   if (!table) return;
   table.innerHTML = adminProducts.map(p => {
