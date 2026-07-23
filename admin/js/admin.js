@@ -378,10 +378,9 @@ async function addProduct() {
   preview.style.display = 'none';
   delete preview.dataset.imageData;
   if (supabaseError) {
-    const errMsg = supabaseErrorMsg || 'Unknown error (check console)';
-    alert(`Product saved locally. Supabase sync failed.\n\nError: ${errMsg}\n\nThe product will appear only to you until Supabase is fixed.`);
+    showToast('Saved locally. Supabase sync failed: ' + (supabaseErrorMsg || 'unknown error'), 'error');
   } else {
-    alert('Product added successfully!');
+    showToast('Product added successfully' + (dbId ? ' & synced to Supabase!' : '!'));
   }
 }
 async function editProduct(id) {
