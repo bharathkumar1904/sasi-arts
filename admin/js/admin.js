@@ -207,6 +207,12 @@ async function renderDashboard() {
     <div class="stat-card"><div class="icon"><i class="fas fa-box"></i></div><div class="label">Products</div><div class="value">${adminProducts.length}</div><div class="change up">${adminProducts.filter(p => p.bestSeller).length} best sellers</div></div>
     <div class="stat-card"><div class="icon"><i class="fas fa-star"></i></div><div class="label">Avg Rating</div><div class="value">4.7</div><div class="change up">&#9733; Excellent</div></div>
     <div class="stat-card"><div class="icon"><i class="fas fa-envelope"></i></div><div class="label">Newsletter Subs</div><div class="value">${getNewsletter().length}</div></div>
+    <div class="stat-card" style="cursor:pointer;background:#1A1A2E;color:#fff;" onclick="testEmailJS()">
+      <div class="icon"><i class="fas fa-paper-plane"></i></div>
+      <div class="label" style="color:#fff;">Test Email</div>
+      <div class="value" style="color:#fff;font-size:13px;" id="emailTestStatus">Click to send</div>
+      <div class="change" style="color:#aaa;font-size:11px;">Sends test to sodasanisasi387@gmail.com</div>
+    </div>
   `;
   document.getElementById('recentOrders').innerHTML = orders.slice(-5).reverse().map(o => `
     <tr>
@@ -221,6 +227,38 @@ async function renderDashboard() {
   document.getElementById('topProducts').innerHTML = adminProducts.slice(0, 5).map(p => `
     <tr><td>${p.name}</td><td>${p.category}</td><td>&#8377;${p.price}</td>    <td>${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}</td><td>${p.reviews || 0} reviews</td></tr>
   `).join('');
+}
+
+function testEmailJS() {
+  var btn = document.getElementById('emailTestStatus');
+  if (!btn) return;
+  btn.textContent = 'Sending...';
+  if (typeof emailjs === 'undefined') { btn.textContent = '❌ EmailJS not loaded'; return; }
+  emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, {
+    to_email: CONFIG.ADMIN_EMAIL,
+    from_name: 'Test from Admin',
+    order_id: 'TEST-' + Date.now().toString(36).toUpperCase(),
+    customer_name: 'Admin Test',
+    customer_phone: '918106545049',
+    shipping_address: 'Test Address, Rajahmundry',
+    city: 'Rajahmundry',
+    state: 'AP',
+    pincode: '533294',
+    items: '• Test Product x1 = ₹499\n• Another Item x2 = ₹998',
+    subtotal: '₹1,497',
+    shipping: '₹50',
+    tax: '₹23',
+    total: '₹1,570',
+    payment_id: 'pay_test123',
+    order_date: new Date().toLocaleString('en-IN'),
+    image_url: ''
+  }, { publicKey: CONFIG.EMAILJS_PUBLIC_KEY }).then(function(r) {
+    btn.textContent = '✅ Sent! Check email';
+    setTimeout(function() { btn.textContent = 'Click to send'; }, 5000);
+  }).catch(function(e) {
+    btn.textContent = '❌ Failed: ' + (e.text || e.message || 'unknown');
+    console.warn('EmailJS test failed:', e);
+  });
 }
 
 // ===== PRODUCTS =====

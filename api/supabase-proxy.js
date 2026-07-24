@@ -1,9 +1,31 @@
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // GET request: params are query params (avoids POST body stripping by mobile carriers)
+  if (req.method === 'GET') {
+    const { path, method, apikey, auth, body } = req.query;
+    if (!path || !apikey) {
+      return res.status(400).json({ error: 'Missing path or apikey' });
+    }
+    const url = `https://wbjgiizrfdjhrccgsdbd.supabase.co/rest/v1/${path}`;
+    const headers = { 'apikey': apikey, 'Authorization': auth ? `Bearer ${auth}` : `Bearer ${apikey}` };
+    const fetchOpts = { method: method || 'GET', headers };
+    try {
+      const supRes = await fetch(url, fetchOpts);
+      const text = await supRes.text();
+      let data;
+      try { data = JSON.parse(text); } catch(e) { data = text; }
+      if (!supRes.ok) return res.status(supRes.status).json({ error: text });
+      return res.status(200).json({ data, error: null });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST required' });
 
   try {
@@ -31,6 +53,6 @@ module.exports = async (req, res) => {
     }
     return res.status(200).json({ data, error: null });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ err: err.message });
   }
 };

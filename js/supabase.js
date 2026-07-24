@@ -19,12 +19,21 @@ try {
 } catch(e) { /* not in admin context */ }
 
 async function supabaseFetch(path, options = {}) {
-  const method = (options.method || 'GET').toUpperCase();
-  const isWrite = method !== 'GET' && method !== 'HEAD';
-  const url = `${SUPABASE_URL}/rest/v1/${path}${path.includes('?') ? '&' : '?'}apikey=${CONFIG.SUPABASE_ANON_KEY}`;
-  const headers = {
+  var method = (options.method || 'GET').toUpperCase();
+  var isWrite = method !== 'GET' && method !== 'HEAD';
+
+  // Try proxy first (same-domain = no header stripping, no DNS blocking)
+  var proxyResult = await proxyFetch(path, options, method);
+  if (proxyResult && proxyResult.data) return proxyResult;
+  if (proxyResult && proxyResult.error && proxyResult.error.includes('AbortError')) {
+    return { data: null, error: 'proxy timeout' };
+  }
+
+  // Fallback: direct Supabase with ?apikey in URL
+  var url = SUPABASE_URL + '/rest/v1/' + path + (path.includes('?') ? '&' : '?') + 'apikey=' + CONFIG.SUPABASE_ANON_KEY;
+  var headers = {
     'apikey': CONFIG.SUPABASE_ANON_KEY,
-    'Authorization': ADMIN_AUTH_TOKEN ? `Bearer ${ADMIN_AUTH_TOKEN}` : `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
+    'Authorization': ADMIN_AUTH_TOKEN ? 'Bearer ' + ADMIN_AUTH_TOKEN : 'Bearer ' + CONFIG.SUPABASE_ANON_KEY
   };
   if (isWrite) {
     headers['Content-Type'] = 'application/json';
@@ -32,46 +41,57 @@ async function supabaseFetch(path, options = {}) {
   }
   try {
     var controller = new AbortController();
-    var timeout = setTimeout(function() { controller.abort(); }, 12000);
+    var timeout = setTimeout(function() { controller.abort(); }, 8000);
     var res = await fetch(url, { ...options, headers: { ...headers, ...options.headers }, signal: controller.signal });
     clearTimeout(timeout);
     if (!res.ok) {
       var err = await res.text();
       if (err.includes('No API key')) throw new Error('header stripped');
-      console.warn(`Supabase direct error (${res.status}): ${err}`);
-      return fallbackFetch(path, options, method);
+      console.warn('Supabase direct error (' + res.status + '): ' + err);
+      return { data: null, error: err };
     }
     var data = await res.json();
-    return { data, error: null };
+    return { data: data, error: null };
   } catch(e) {
-    if (e.message === 'header stripped' || e.name === 'TypeError' || e.message === 'Failed to fetch' || e.name === 'AbortError') {
-      console.warn('Supabase direct failed, trying proxy:', e.message);
-      return fallbackFetch(path, options, method);
-    }
-    console.warn('Supabase fetch error:', e.message);
+    console.warn('Supabase direct failed:', e.message);
     return { data: null, error: e.message };
   }
 }
 
-async function fallbackFetch(path, options, method) {
+async function proxyFetch(path, options, method) {
   try {
     var proxyUrl = (window.location.origin || CONFIG.API_BASE_URL) + '/api/supabase-proxy';
     var auth = ADMIN_AUTH_TOKEN || CONFIG.SUPABASE_ANON_KEY;
     var body = options.body ? JSON.parse(options.body) : null;
     var controller = new AbortController();
-    var timeout = setTimeout(function() { controller.abort(); }, 12000);
+    var timeout = setTimeout(function() { controller.abort(); }, 20000);
+
+    // Use GET for non-write ops (avoids POST body stripping by mobile carriers)
+    if (!body || method === 'GET') {
+      var qs = 'path=' + encodeURIComponent(path) + '&method=' + encodeURIComponent(method) + '&apikey=' + encodeURIComponent(CONFIG.SUPABASE_ANON_KEY) + '&auth=' + encodeURIComponent(auth);
+      var res = await fetch(proxyUrl + '?' + qs, {
+        method: 'GET',
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      var result = await res.json();
+      if (!res.ok) return { data: null, error: result.error || 'proxy error' };
+      return result;
+    }
+
+    // POST for writes (need to send body)
     var res = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, body, method, apikey: CONFIG.SUPABASE_ANON_KEY, auth }),
+      body: JSON.stringify({ path: path, body: body, method: method, apikey: CONFIG.SUPABASE_ANON_KEY, auth: auth }),
       signal: controller.signal
     });
     clearTimeout(timeout);
-    const result = await res.json();
+    var result = await res.json();
     if (!res.ok) return { data: null, error: result.error || 'proxy error' };
     return result;
   } catch(e) {
-    console.warn('Supabase proxy fallback failed:', e.message);
+    console.warn('Proxy fetch failed:', e.message);
     return { data: null, error: e.message };
   }
 }
