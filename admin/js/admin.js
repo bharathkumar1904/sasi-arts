@@ -1,4 +1,10 @@
 // ===== TOAST =====
+function saveAdminProducts() {
+  try { localStorage.setItem('adminProducts', JSON.stringify(adminProducts)); return true; } catch(e) {
+    for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
+    try { localStorage.setItem('adminProducts', JSON.stringify(adminProducts)); return true; } catch(e2) { return false; }
+  }
+}
 function showToast(message, type = 'success') {
   const existing = document.querySelector('.admin-toast');
   if (existing) existing.remove();
@@ -372,11 +378,7 @@ async function addProduct() {
     ? 'Saved locally. Supabase sync failed: ' + (supabaseErrorMsg || 'unknown error')
     : 'Product added successfully' + (dbId ? ' & synced to Supabase!' : '!');
   const isErr = supabaseError;
-  try { localStorage.setItem('adminProducts', JSON.stringify(adminProducts)); } catch(e) {
-    adminProducts.pop();
-    showToast('Failed to save: ' + e.message, 'error');
-    return;
-  }
+  if (!saveAdminProducts()) { adminProducts.pop(); showToast('Failed to save (localStorage full).', 'error'); return; }
   try { await renderProducts(); } catch(e) {
     document.getElementById('productTable').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#FF4444;">Render error: ' + e.message + '</td></tr>';
   }
@@ -410,7 +412,7 @@ async function editProduct(id) {
     p.images = [p.image, ...newExtra];
   }
   p.customizable = confirm(`Customizable? (Current: ${p.customizable !== false ? 'Yes' : 'No'})\n\nOK = Yes, Cancel = No`);
-  localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
+  saveAdminProducts();
   renderProducts();
   // Sync to Supabase if product has a db_id
   const dbId = p?.db_id || p?.id;
@@ -437,7 +439,7 @@ async function deleteProduct(id) {
   const p = adminProducts.find(x => x.id === id);
   // Mark as deleted (keeps it in adminProducts so the flag propagates to the main site)
   adminProducts = adminProducts.map(x => x.id === id ? { ...x, _deleted: true } : x);
-  localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
+  saveAdminProducts();
   renderProducts();
   // Delete from Supabase
   let dbId = p?.db_id || p?.id;
@@ -981,7 +983,7 @@ async function toggleBestseller(id) {
   const newVal = !(p.is_best_seller || p.bestSeller);
   p.is_best_seller = newVal;
   p.bestSeller = newVal;
-  localStorage.setItem('adminProducts', JSON.stringify(adminProducts));
+  saveAdminProducts();
   renderBestsellers();
   showToast(`${p.name} ${newVal ? 'added to' : 'removed from'} Best Sellers`);
   // Sync to Supabase using the actual DB id if available
