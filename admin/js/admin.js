@@ -374,11 +374,7 @@ async function addProduct() {
   }
   const finalId = dbId || Date.now();
   adminProducts.push({ ...newProduct, id: finalId, oldPrice, reviews: reviewsCount, bestSeller: isBestSeller, db_id: dbId });
-  const msg = supabaseError
-    ? 'Saved locally. Supabase sync failed: ' + (supabaseErrorMsg || 'unknown error')
-    : 'Product added successfully' + (dbId ? ' & synced to Supabase!' : '!');
-  const isErr = supabaseError;
-  if (!saveAdminProducts()) { adminProducts.pop(); showToast('Failed to save (localStorage full).', 'error'); return; }
+  if (!saveAdminProducts()) { adminProducts.pop(); }
   try { await renderProducts(); } catch(e) {
     document.getElementById('productTable').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#FF4444;">Render error: ' + e.message + '</td></tr>';
   }
@@ -389,7 +385,11 @@ async function addProduct() {
   preview.src = '';
   preview.style.display = 'none';
   delete preview.dataset.imageData;
-  try { showToast(msg, isErr ? 'error' : 'success'); } catch(e) { alert(msg); }
+  if (supabaseError) {
+    alert('Product saved locally. Supabase sync failed:\n' + (supabaseErrorMsg || 'unknown error'));
+  } else {
+    alert('Product added successfully' + (dbId ? ' & synced to Supabase!' : '!'));
+  }
 }
 async function editProduct(id) {
   const p = adminProducts.find(x => x.id === id);
