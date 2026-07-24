@@ -19,7 +19,9 @@ try {
 } catch(e) { /* not in admin context */ }
 
 async function supabaseFetch(path, options = {}) {
-  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+  const method = (options.method || 'GET').toUpperCase();
+  const isWrite = method !== 'GET' && method !== 'HEAD';
+  const url = `${SUPABASE_URL}/rest/v1/${path}${path.includes('?') ? '&' : '?'}apikey=${CONFIG.SUPABASE_ANON_KEY}`;
   const method = (options.method || 'GET').toUpperCase();
   const isWrite = method !== 'GET' && method !== 'HEAD';
   const headers = {
@@ -214,7 +216,7 @@ async function testSupabaseConnection() {
 
 // ===== SUPABASE STORAGE (Image Upload) =====
 async function uploadImage(bucket, filePath, file) {
-  const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${filePath}`;
+  const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${filePath}?apikey=${CONFIG.SUPABASE_ANON_KEY}`;
   try {
     const res = await fetch(url, {
       method: 'POST',
