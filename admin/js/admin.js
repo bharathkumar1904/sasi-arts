@@ -219,7 +219,7 @@ async function renderDashboard() {
     </tr>
   `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--gray-600);">No orders yet</td></tr>';
   document.getElementById('topProducts').innerHTML = adminProducts.slice(0, 5).map(p => `
-    <tr><td>${p.name}</td><td>${p.category}</td><td>&#8377;${p.price}</td><td>${'★'.repeat(Math.floor(p.rating))}</td><td>${p.reviews || 0} reviews</td></tr>
+    <tr><td>${p.name}</td><td>${p.category}</td><td>&#8377;${p.price}</td>    <td>${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}</td><td>${p.reviews || 0} reviews</td></tr>
   `).join('');
 }
 
@@ -355,8 +355,8 @@ async function addProduct() {
   const sizes = getSizesList();
   const materials = getMaterialsList();
   const allImages = [image, ...extraImages].filter(Boolean);
-  const offerQty = parseInt(document.getElementById('pOfferQty').value);
-  const offerPrice = parseInt(document.getElementById('pOfferPrice').value);
+  const offerQty = parseInt(document.getElementById('pOfferQty').value, 10);
+  const offerPrice = parseInt(document.getElementById('pOfferPrice').value, 10);
   const offer = (offerQty && offerPrice) ? { qty: offerQty, price: offerPrice } : null;
   const newProduct = {
     name, category, price, old_price: oldPrice,
@@ -393,6 +393,17 @@ async function addProduct() {
   document.getElementById('pName').value = '';
   document.getElementById('pPrice').value = '';
   document.getElementById('pOldPrice').value = '';
+  document.getElementById('pRating').value = '4';
+  document.getElementById('pReviews').value = '0';
+  document.getElementById('pBadge').value = '';
+  document.getElementById('pBestSeller').checked = false;
+  document.getElementById('pCustomizable').checked = false;
+  document.getElementById('pOfferQty').value = '';
+  document.getElementById('pOfferPrice').value = '';
+  document.getElementById('pSizes').value = '';
+  document.getElementById('pMaterials').value = '';
+  const extraContainer = document.getElementById('extraImagesContainer');
+  if (extraContainer) extraContainer.innerHTML = '';
   preview.src = '';
   preview.style.display = 'none';
   delete preview.dataset.imageData;
@@ -408,7 +419,7 @@ async function editProduct(id) {
   const name = prompt('Product name:', p.name);
   if (name) p.name = name;
   const price = prompt('Price:', p.price);
-  if (price) p.price = parseInt(price);
+  if (price) p.price = parseInt(price, 10);
   const category = prompt('Category:', p.category || '');
   if (category) p.category = category;
   const sizesStr = prompt('Sizes (comma-separated, leave blank to keep):', (p.sizes || []).join(', '));
@@ -499,7 +510,7 @@ async function loadOrders() {
     console.warn('Supabase orders unavailable, using local:', e.message);
     allOrders = local;
   }
-  localStorage.setItem('sasiOrders', JSON.stringify(allOrders));
+  try { localStorage.setItem('sasiOrders', JSON.stringify(allOrders)); } catch(e) { console.warn('Orders save failed:', e.message); }
   renderOrdersTable();
 }
 
@@ -539,8 +550,8 @@ function renderOrdersTable() {
 async function updateOrderStatus(id, status) {
   const order = allOrders.find(o => o.id === id);
   if (order) {
-    order.status = parseInt(status);
-    localStorage.setItem('sasiOrders', JSON.stringify(allOrders));
+    order.status = parseInt(status, 10);
+    try { localStorage.setItem('sasiOrders', JSON.stringify(allOrders)); } catch(e) { console.warn('Orders save failed:', e.message); }
     try { await updateOrderStatusInDB(id, status); } catch(e) { /* local only */ }
   }
 }
