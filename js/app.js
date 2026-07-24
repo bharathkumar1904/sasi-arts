@@ -1285,20 +1285,6 @@ document.addEventListener('click', function() {
   _tapTimer = setTimeout(function() { _tapCount = 0; }, 3000);
   if (_tapCount >= 7) { _tapCount = 0; showDebugInfo(); }
 });
-  var freed = 0;
-  for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts' && k !== 'sasiCacheVersion') { try { localStorage.removeItem(k); freed++; } catch(e) {} } }
-  if (state.orders && state.orders.length > 10) state.orders = state.orders.slice(-10);
-  if (state.cart && state.cart.length > 20) state.cart = state.cart.slice(-20);
-  if (state.wkItems && state.wkItems.length > 20) state.wkItems = state.wkItems.slice(-20);
-  if (state.viewedProducts && state.viewedProducts.length > 8) state.viewedProducts = state.viewedProducts.slice(-8);
-  if (state.wishlist && state.wishlist.length > 50) state.wishlist = state.wishlist.slice(-50);
-  try { localStorage.setItem('sasiOrders', JSON.stringify(state.orders)); } catch(e) {}
-  try { localStorage.setItem('sasiCart', JSON.stringify(state.cart)); } catch(e) {}
-  try { localStorage.setItem('sasiWKItems', JSON.stringify(state.wkItems)); } catch(e) {}
-  try { localStorage.setItem('sasiRecent', JSON.stringify(state.viewedProducts)); } catch(e) {}
-  try { localStorage.setItem('sasiWishlist', JSON.stringify(state.wishlist)); } catch(e) {}
-  return freed;
-}
 
 function loadTodaysDeal() {
   const saved = JSON.parse(localStorage.getItem('sasiCurrentOffer') || '{}');
