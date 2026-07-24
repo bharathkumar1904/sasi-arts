@@ -1,6 +1,6 @@
 // ===== FORCE FRESH LOAD IF STALE CACHE =====
 (function() {
-  var APP_VERSION = 'v30';
+  var APP_VERSION = 'v31';
   var prev = sessionStorage.getItem('sasiAppVersion');
   if (prev && prev !== APP_VERSION) {
     sessionStorage.setItem('sasiAppVersion', APP_VERSION);
