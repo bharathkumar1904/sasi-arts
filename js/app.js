@@ -1,3 +1,15 @@
+// ===== FORCE FRESH LOAD IF STALE CACHE =====
+(function() {
+  var APP_VERSION = 'v27';
+  var prev = sessionStorage.getItem('sasiAppVersion');
+  if (prev && prev !== APP_VERSION) {
+    sessionStorage.setItem('sasiAppVersion', APP_VERSION);
+    location.reload(true);
+    return;
+  }
+  sessionStorage.setItem('sasiAppVersion', APP_VERSION);
+})();
+
 // ===== PRODUCT DATA SOURCE (data.js base, localStorage overlay) =====
 let PRODUCTS = [...SAMPLE_PRODUCTS];;
 function applyAdminEdits() {
