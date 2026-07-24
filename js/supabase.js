@@ -199,12 +199,15 @@ async function testSupabaseConnection() {
     const { data, error } = await supabaseFetch('products?select=count&limit=1');
     if (error) {
       console.warn('⚠️ Supabase connection failed:', error);
+      window.__supabaseOk = '❌ ' + error;
       return false;
     }
     console.log('✅ Supabase connected successfully');
+    window.__supabaseOk = '✅ Connected';
     return true;
   } catch (e) {
     console.warn('⚠️ Supabase connection error:', e.message);
+    window.__supabaseOk = '❌ ' + e.message;
     return false;
   }
 }

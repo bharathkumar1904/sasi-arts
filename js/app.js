@@ -44,33 +44,12 @@ function saveState(key) {
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
       console.warn('localStorage full. Aggressive auto-cleaning...');
-      // Step 1: remove non-sasi junk
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const k = localStorage.key(i);
-        if (k && !k.startsWith('sasi')) localStorage.removeItem(k);
-      }
-      // Step 2: clear supabaseProducts cache (large, can be re-fetched)
+      storageQuotaCleanup();
       localStorage.removeItem('supabaseProducts');
-      // Step 3: trim all arrays that hold image data
-      const trim = (arr, max) => arr.slice(-max);
-      if (state.orders && state.orders.length > 10) state.orders = trim(state.orders, 10);
-      if (state.cart && state.cart.length > 20) state.cart = trim(state.cart, 20);
-      if (state.wkItems && state.wkItems.length > 20) state.wkItems = trim(state.wkItems, 20);
-      if (state.viewedProducts && state.viewedProducts.length > 8) state.viewedProducts = trim(state.viewedProducts, 8);
-      if (state.wishlist && state.wishlist.length > 50) state.wishlist = trim(state.wishlist, 50);
-      // Step 4: persist trimmed state
-      try {
-        localStorage.setItem('sasiOrders', JSON.stringify(state.orders));
-        localStorage.setItem('sasiCart', JSON.stringify(state.cart));
-        localStorage.setItem('sasiWKItems', JSON.stringify(state.wkItems));
-        localStorage.setItem('sasiRecent', JSON.stringify(state.viewedProducts));
-        localStorage.setItem('sasiWishlist', JSON.stringify(state.wishlist));
-      } catch(e3) {}
-      // Step 5: retry the original save
       try {
         localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
       } catch(e2) {
-        showToast('Storage full. Clear browser data.', 'error');
+        showStorageFullBanner();
       }
     } else {
       console.warn('saveState error:', e);
@@ -150,8 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
           PRODUCTS = Array.from(localMap.values());
           applyAdminEdits();
           try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e) {
-            for (let j = localStorage.length - 1; j >= 0; j--) { const k = localStorage.key(j); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-            try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); }
+            storageQuotaCleanup();
+            try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); showStorageFullBanner(); }
           }
           renderAll();
           const shopPage = document.getElementById('shop-page');
@@ -1267,6 +1246,65 @@ function updatePreview() {
 }
 
 // ===== LOAD TODAY'S DEAL =====
+// ===== STORAGE DIAGNOSTIC =====
+function showStorageFullBanner() {
+  var existing = document.getElementById('sasiStorageBanner');
+  if (existing) return;
+  var b = document.createElement('div');
+  b.id = 'sasiStorageBanner';
+  b.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:14px 20px;font-size:13px;text-align:center;font-family:Poppins,sans-serif;border-top:3px solid #fff;cursor:pointer;';
+  b.innerHTML = '⚠️ Storage full — products may not show. <strong>Tap to clear</strong>';
+  b.onclick = function() {
+    Object.keys(localStorage).forEach(function(k) { if (k.startsWith('sasi') || k === 'supabaseProducts') localStorage.removeItem(k); });
+    b.innerHTML = '✅ Cleared! Refreshing...';
+    setTimeout(function() { location.reload(); }, 1000);
+  };
+  document.body.appendChild(b);
+}
+
+function showDebugInfo() {
+  var el = document.getElementById('sasiDebug');
+  if (el) { el.remove(); return; }
+  var used = 0;
+  for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k) used += localStorage.getItem(k).length * 2; }
+  var div = document.createElement('div');
+  div.id = 'sasiDebug';
+  div.style.cssText = 'position:fixed;top:60px;left:10px;z-index:999999;background:#1A1A2E;color:#fff;padding:16px;border-radius:12px;font-size:12px;font-family:monospace;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+  div.innerHTML = '📊 <strong>Debug</strong><br>' +
+    'Products: ' + PRODUCTS.length + '<br>' +
+    'Supabase: ' + (typeof window.__supabaseOk !== 'undefined' ? window.__supabaseOk : '?') + '<br>' +
+    'localStorage: ' + (used / 1024).toFixed(1) + 'KB / 5120KB<br>' +
+    'Keys: ' + localStorage.length + '<br>' +
+    '<button onclick="localStorage.clear();location.reload()" style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;margin-top:8px;cursor:pointer;">🗑️ Clear ALL & Reload</button>' +
+    '<button onclick="this.parentElement.remove()" style="background:#555;color:#fff;border:none;padding:6px 12px;border-radius:6px;margin-top:8px;margin-left:6px;cursor:pointer;">✕ Close</button>';
+  document.body.appendChild(div);
+}
+
+var _tapCount = 0;
+var _tapTimer = null;
+document.addEventListener('click', function() {
+  _tapCount++;
+  if (_tapTimer) clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(function() { _tapCount = 0; }, 3000);
+  if (_tapCount >= 7) { _tapCount = 0; showDebugInfo(); }
+});
+
+function storageQuotaCleanup() {
+  var freed = 0;
+  for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts' && k !== 'sasiCacheVersion') { try { localStorage.removeItem(k); freed++; } catch(e) {} } }
+  if (state.orders && state.orders.length > 10) state.orders = state.orders.slice(-10);
+  if (state.cart && state.cart.length > 20) state.cart = state.cart.slice(-20);
+  if (state.wkItems && state.wkItems.length > 20) state.wkItems = state.wkItems.slice(-20);
+  if (state.viewedProducts && state.viewedProducts.length > 8) state.viewedProducts = state.viewedProducts.slice(-8);
+  if (state.wishlist && state.wishlist.length > 50) state.wishlist = state.wishlist.slice(-50);
+  try { localStorage.setItem('sasiOrders', JSON.stringify(state.orders)); } catch(e) {}
+  try { localStorage.setItem('sasiCart', JSON.stringify(state.cart)); } catch(e) {}
+  try { localStorage.setItem('sasiWKItems', JSON.stringify(state.wkItems)); } catch(e) {}
+  try { localStorage.setItem('sasiRecent', JSON.stringify(state.viewedProducts)); } catch(e) {}
+  try { localStorage.setItem('sasiWishlist', JSON.stringify(state.wishlist)); } catch(e) {}
+  return freed;
+}
+
 function loadTodaysDeal() {
   const saved = JSON.parse(localStorage.getItem('sasiCurrentOffer') || '{}');
   if (saved.title) {
