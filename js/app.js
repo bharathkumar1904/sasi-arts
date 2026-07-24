@@ -43,18 +43,30 @@ function saveState(key) {
     localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
-      console.warn('localStorage full. Auto-cleaning...');
-      // Step 1: remove junk keys
+      console.warn('localStorage full. Aggressive auto-cleaning...');
+      // Step 1: remove non-sasi junk
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const k = localStorage.key(i);
         if (k && !k.startsWith('sasi')) localStorage.removeItem(k);
       }
+      // Step 2: clear supabaseProducts cache (large, can be re-fetched)
       localStorage.removeItem('supabaseProducts');
-      // Step 2: trim orders to last 10 (they hold image data)
-      if (state.orders && state.orders.length > 10) {
-        state.orders = state.orders.slice(-10);
-        try { localStorage.setItem('sasiOrders', JSON.stringify(state.orders)); } catch(e3) {}
-      }
+      // Step 3: trim all arrays that hold image data
+      const trim = (arr, max) => arr.slice(-max);
+      if (state.orders && state.orders.length > 10) state.orders = trim(state.orders, 10);
+      if (state.cart && state.cart.length > 20) state.cart = trim(state.cart, 20);
+      if (state.wkItems && state.wkItems.length > 20) state.wkItems = trim(state.wkItems, 20);
+      if (state.viewedProducts && state.viewedProducts.length > 8) state.viewedProducts = trim(state.viewedProducts, 8);
+      if (state.wishlist && state.wishlist.length > 50) state.wishlist = trim(state.wishlist, 50);
+      // Step 4: persist trimmed state
+      try {
+        localStorage.setItem('sasiOrders', JSON.stringify(state.orders));
+        localStorage.setItem('sasiCart', JSON.stringify(state.cart));
+        localStorage.setItem('sasiWKItems', JSON.stringify(state.wkItems));
+        localStorage.setItem('sasiRecent', JSON.stringify(state.viewedProducts));
+        localStorage.setItem('sasiWishlist', JSON.stringify(state.wishlist));
+      } catch(e3) {}
+      // Step 5: retry the original save
       try {
         localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
       } catch(e2) {
