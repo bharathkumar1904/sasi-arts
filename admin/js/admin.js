@@ -446,7 +446,14 @@ async function deleteProduct(id) {
   if (!dbId) { console.warn('No ID for this product'); return; }
   // If dbId is a Date.now() number (local-only product), skip DB delete
   if (typeof dbId === 'number' && dbId > 999999999) { return; }
-  try { const r = await deleteProductFromDB(dbId); if (r.error) console.error('Supabase delete error:', r.error); } catch(e) { console.warn('Supabase sync skipped:', e.message); }
+  try {
+    const r = await deleteProductFromDB(dbId);
+    if (r.error) console.error('Supabase delete error:', r.error);
+    else {
+      const deleted = JSON.parse(localStorage.getItem('sasiDeletedSupabaseIds') || '[]');
+      if (!deleted.includes(dbId)) { deleted.push(dbId); localStorage.setItem('sasiDeletedSupabaseIds', JSON.stringify(deleted)); }
+    }
+  } catch(e) { console.warn('Supabase sync skipped:', e.message); }
 }
 
 // ===== ORDERS =====

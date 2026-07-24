@@ -4,8 +4,10 @@ function applyAdminEdits() {
   const stored = localStorage.getItem('adminProducts');
   if (!stored) return;
   try {
+    const deletedSupabaseIds = JSON.parse(localStorage.getItem('sasiDeletedSupabaseIds') || '[]');
+    PRODUCTS = PRODUCTS.filter(p => !deletedSupabaseIds.includes(p.id));
     const parsed = JSON.parse(stored).map(p => ({ ...p, bestSeller: p.is_best_seller || p.bestSeller }));
-    const deletedIds = new Set(parsed.filter(p => p._deleted).map(p => p.id));
+    const deletedIds = new Set([...parsed.filter(p => p._deleted).map(p => p.id), ...deletedSupabaseIds]);
     PRODUCTS = PRODUCTS.filter(p => !deletedIds.has(p.id));
     const map = new Map(PRODUCTS.map(p => [p.id, p]));
     parsed.filter(p => !p._deleted).forEach(p => map.set(p.id, { ...map.get(p.id), ...p }));
@@ -36,7 +38,6 @@ function saveState(key) {
         if (k && !k.startsWith('sasi')) localStorage.removeItem(k);
       }
       localStorage.removeItem('supabaseProducts');
-      localStorage.removeItem('adminProducts');
       // Step 2: trim orders to last 10 (they hold image data)
       if (state.orders && state.orders.length > 10) {
         state.orders = state.orders.slice(-10);
