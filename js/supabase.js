@@ -22,8 +22,6 @@ async function supabaseFetch(path, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   const isWrite = method !== 'GET' && method !== 'HEAD';
   const url = `${SUPABASE_URL}/rest/v1/${path}${path.includes('?') ? '&' : '?'}apikey=${CONFIG.SUPABASE_ANON_KEY}`;
-  const method = (options.method || 'GET').toUpperCase();
-  const isWrite = method !== 'GET' && method !== 'HEAD';
   const headers = {
     'apikey': CONFIG.SUPABASE_ANON_KEY,
     'Authorization': ADMIN_AUTH_TOKEN ? `Bearer ${ADMIN_AUTH_TOKEN}` : `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
@@ -32,17 +30,42 @@ async function supabaseFetch(path, options = {}) {
     headers['Content-Type'] = 'application/json';
     headers['Prefer'] = 'return=representation';
   }
-  const res = await fetch(url, {
-    ...options,
-    headers: { ...headers, ...options.headers }
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    console.warn(`Supabase error (${res.status}): ${err}`);
-    return { data: null, error: err };
+  try {
+    const res = await fetch(url, { ...options, headers: { ...headers, ...options.headers } });
+    if (!res.ok) {
+      const err = await res.text();
+      if (err.includes('No API key')) throw new Error('header stripped');
+      console.warn(`Supabase direct error (${res.status}): ${err}`);
+      return fallbackFetch(path, options, method);
+    }
+    const data = await res.json();
+    return { data, error: null };
+  } catch(e) {
+    if (e.message === 'header stripped' || e.name === 'TypeError' || e.message === 'Failed to fetch') {
+      return fallbackFetch(path, options, method);
+    }
+    console.warn('Supabase fetch error:', e.message);
+    return { data: null, error: e.message };
   }
-  const data = await res.json();
-  return { data, error: null };
+}
+
+async function fallbackFetch(path, options, method) {
+  try {
+    const proxyUrl = (window.location.origin || CONFIG.API_BASE_URL) + '/api/supabase-proxy';
+    const auth = ADMIN_AUTH_TOKEN || CONFIG.SUPABASE_ANON_KEY;
+    const body = options.body ? JSON.parse(options.body) : null;
+    const res = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path, body, method, apikey: CONFIG.SUPABASE_ANON_KEY, auth })
+    });
+    const result = await res.json();
+    if (!res.ok) return { data: null, error: result.error || 'proxy error' };
+    return result;
+  } catch(e) {
+    console.warn('Supabase proxy fallback failed:', e.message);
+    return { data: null, error: e.message };
+  }
 }
 
 // ===== PRODUCTS =====
