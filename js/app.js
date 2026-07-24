@@ -1,6 +1,6 @@
 // ===== FORCE FRESH LOAD IF STALE CACHE =====
 (function() {
-  var APP_VERSION = 'v32';
+  var APP_VERSION = 'v33';
   var prev = sessionStorage.getItem('sasiAppVersion');
   if (prev && prev !== APP_VERSION) {
     sessionStorage.setItem('sasiAppVersion', APP_VERSION);
@@ -654,6 +654,9 @@ async function handleModalPhoto(e) {
       document.getElementById('modalProductImage').src = url;
       replaceModalPhotoThumb(previewUrl, url);
       showToast(file.name + ' uploaded!');
+    } else {
+      modalPhotosData.push(previewUrl);
+      showToast(file.name + ' saved locally', 'error');
     }
   }
   if (modalPhotosData.length) showToast(modalPhotosData.length + ' photo(s) uploaded!');
