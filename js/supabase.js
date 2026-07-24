@@ -31,17 +31,21 @@ async function supabaseFetch(path, options = {}) {
     headers['Prefer'] = 'return=representation';
   }
   try {
-    const res = await fetch(url, { ...options, headers: { ...headers, ...options.headers } });
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 12000);
+    var res = await fetch(url, { ...options, headers: { ...headers, ...options.headers }, signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) {
-      const err = await res.text();
+      var err = await res.text();
       if (err.includes('No API key')) throw new Error('header stripped');
       console.warn(`Supabase direct error (${res.status}): ${err}`);
       return fallbackFetch(path, options, method);
     }
-    const data = await res.json();
+    var data = await res.json();
     return { data, error: null };
   } catch(e) {
-    if (e.message === 'header stripped' || e.name === 'TypeError' || e.message === 'Failed to fetch') {
+    if (e.message === 'header stripped' || e.name === 'TypeError' || e.message === 'Failed to fetch' || e.name === 'AbortError') {
+      console.warn('Supabase direct failed, trying proxy:', e.message);
       return fallbackFetch(path, options, method);
     }
     console.warn('Supabase fetch error:', e.message);
@@ -51,14 +55,18 @@ async function supabaseFetch(path, options = {}) {
 
 async function fallbackFetch(path, options, method) {
   try {
-    const proxyUrl = (window.location.origin || CONFIG.API_BASE_URL) + '/api/supabase-proxy';
-    const auth = ADMIN_AUTH_TOKEN || CONFIG.SUPABASE_ANON_KEY;
-    const body = options.body ? JSON.parse(options.body) : null;
-    const res = await fetch(proxyUrl, {
+    var proxyUrl = (window.location.origin || CONFIG.API_BASE_URL) + '/api/supabase-proxy';
+    var auth = ADMIN_AUTH_TOKEN || CONFIG.SUPABASE_ANON_KEY;
+    var body = options.body ? JSON.parse(options.body) : null;
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 12000);
+    var res = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, body, method, apikey: CONFIG.SUPABASE_ANON_KEY, auth })
+      body: JSON.stringify({ path, body, method, apikey: CONFIG.SUPABASE_ANON_KEY, auth }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     const result = await res.json();
     if (!res.ok) return { data: null, error: result.error || 'proxy error' };
     return result;

@@ -1,6 +1,6 @@
 // ===== FORCE FRESH LOAD IF STALE CACHE =====
 (function() {
-  var APP_VERSION = 'v31';
+  var APP_VERSION = 'v32';
   var prev = sessionStorage.getItem('sasiAppVersion');
   if (prev && prev !== APP_VERSION) {
     sessionStorage.setItem('sasiAppVersion', APP_VERSION);
@@ -49,7 +49,6 @@ function saveState(key) {
       try {
         localStorage.setItem(`sasi${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(state[key]));
       } catch(e2) {
-        showStorageFullBanner();
       }
     } else {
       console.warn('saveState error:', e);
@@ -130,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
           applyAdminEdits();
           try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e) {
             storageQuotaCleanup();
-            try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); showStorageFullBanner(); }
+            try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); }
           }
           renderAll();
           const shopPage = document.getElementById('shop-page');
@@ -1245,23 +1244,21 @@ function updatePreview() {
   }
 }
 
-// ===== LOAD TODAY'S DEAL =====
-// ===== STORAGE DIAGNOSTIC =====
-function showStorageFullBanner() {
-  var existing = document.getElementById('sasiStorageBanner');
-  if (existing) return;
-  var b = document.createElement('div');
-  b.id = 'sasiStorageBanner';
-  b.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:14px 20px;font-size:13px;text-align:center;font-family:Poppins,sans-serif;border-top:3px solid #fff;cursor:pointer;';
-  b.innerHTML = '⚠️ Storage full — products may not show. <strong>Tap to clear</strong>';
-  b.onclick = function() {
-    Object.keys(localStorage).forEach(function(k) { if (k.startsWith('sasi') || k === 'supabaseProducts') localStorage.removeItem(k); });
-    b.innerHTML = '✅ Cleared! Refreshing...';
-    setTimeout(function() { location.reload(); }, 1000);
-  };
-  document.body.appendChild(b);
+function storageQuotaCleanup() {
+  for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts' && k !== 'sasiCacheVersion') { try { localStorage.removeItem(k); } catch(e) {} } }
+  if (state.orders && state.orders.length > 10) state.orders = state.orders.slice(-10);
+  if (state.cart && state.cart.length > 20) state.cart = state.cart.slice(-20);
+  if (state.wkItems && state.wkItems.length > 20) state.wkItems = state.wkItems.slice(-20);
+  if (state.viewedProducts && state.viewedProducts.length > 8) state.viewedProducts = state.viewedProducts.slice(-8);
+  if (state.wishlist && state.wishlist.length > 50) state.wishlist = state.wishlist.slice(-50);
+  try { localStorage.setItem('sasiOrders', JSON.stringify(state.orders)); } catch(e) {}
+  try { localStorage.setItem('sasiCart', JSON.stringify(state.cart)); } catch(e) {}
+  try { localStorage.setItem('sasiWKItems', JSON.stringify(state.wkItems)); } catch(e) {}
+  try { localStorage.setItem('sasiRecent', JSON.stringify(state.viewedProducts)); } catch(e) {}
+  try { localStorage.setItem('sasiWishlist', JSON.stringify(state.wishlist)); } catch(e) {}
 }
 
+// ===== DEBUG PANEL =====
 function showDebugInfo() {
   var el = document.getElementById('sasiDebug');
   if (el) { el.remove(); return; }
@@ -1288,8 +1285,6 @@ document.addEventListener('click', function() {
   _tapTimer = setTimeout(function() { _tapCount = 0; }, 3000);
   if (_tapCount >= 7) { _tapCount = 0; showDebugInfo(); }
 });
-
-function storageQuotaCleanup() {
   var freed = 0;
   for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts' && k !== 'sasiCacheVersion') { try { localStorage.removeItem(k); freed++; } catch(e) {} } }
   if (state.orders && state.orders.length > 10) state.orders = state.orders.slice(-10);
