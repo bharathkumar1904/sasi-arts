@@ -9,15 +9,8 @@ function setAdminToken(token) {
   ADMIN_AUTH_TOKEN = token;
 }
 
-const SUPABASE_HEADERS = {
-  'apikey': CONFIG.SUPABASE_ANON_KEY,
-  'Content-Type': 'application/json',
-  'Prefer': 'return=representation'
-};
-
 const SUPABASE_URL = CONFIG.SUPABASE_URL;
 
-// Supabase Auth client (loaded from CDN in admin panel)
 let supabaseClient = null;
 try {
   if (typeof supabase !== 'undefined') {
@@ -27,12 +20,15 @@ try {
 
 async function supabaseFetch(path, options = {}) {
   const url = `${SUPABASE_URL}/rest/v1/${path}`;
-  const headers = { ...SUPABASE_HEADERS };
-  // Use admin auth token if available, otherwise fall back to anon key
-  if (ADMIN_AUTH_TOKEN) {
-    headers['Authorization'] = `Bearer ${ADMIN_AUTH_TOKEN}`;
-  } else {
-    headers['Authorization'] = `Bearer ${CONFIG.SUPABASE_ANON_KEY}`;
+  const method = (options.method || 'GET').toUpperCase();
+  const isWrite = method !== 'GET' && method !== 'HEAD';
+  const headers = {
+    'apikey': CONFIG.SUPABASE_ANON_KEY,
+    'Authorization': ADMIN_AUTH_TOKEN ? `Bearer ${ADMIN_AUTH_TOKEN}` : `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
+  };
+  if (isWrite) {
+    headers['Content-Type'] = 'application/json';
+    headers['Prefer'] = 'return=representation';
   }
   const res = await fetch(url, {
     ...options,

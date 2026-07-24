@@ -267,8 +267,8 @@ function renderProductCard(p) {
         <div class="category-tag">${p.category}</div>
         <h3>${p.name}</h3>
         <div class="rating">
-          <span class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 >= 0.5 ? '½' : ''}</span>
-          <span class="count">(${p.reviews})</span>
+          <span class="stars">${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}${(Number(p.rating) || 0) % 1 >= 0.5 ? '½' : ''}</span>
+          <span class="count">(${p.reviews || 0})</span>
         </div>
         <div class="price">
           ${priceDisplay}
@@ -444,8 +444,8 @@ function renderHomepageProducts() {
           <div class="category-tag">${p.category}</div>
           <h3>${p.name}</h3>
           <div class="rating">
-            <span class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 >= 0.5 ? '½' : ''}</span>
-            <span class="count">(${p.reviews})</span>
+            <span class="stars">${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}${(Number(p.rating) || 0) % 1 >= 0.5 ? '½' : ''}</span>
+            <span class="count">(${p.reviews || 0})</span>
           </div>
           <div class="price">
             <span class="current">&#8377;${priceStr}</span>
@@ -579,7 +579,7 @@ async function openProductModal(id) {
   document.getElementById('modalCategory').textContent = p.category;
   document.getElementById('modalProductName').textContent = p.name;
   const totalReviews = p.reviews || 0;
-  document.getElementById('modalRating').innerHTML = `${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 >= 0.5 ? '½' : ''} <small style="color:var(--gray-500);">(${totalReviews} reviews)</small>`;
+  document.getElementById('modalRating').innerHTML = `${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}${(Number(p.rating) || 0) % 1 >= 0.5 ? '½' : ''} <small style="color:var(--gray-500);">(${totalReviews} reviews)</small>`;
   const modalPriceHtml = p.allInclusive
     ? `&#8377;${Number(p.price).toLocaleString()} <small style="font-size:13px;color:#22C55E;font-weight:500;">(All inclusive)</small>`
     : `&#8377;${Number(p.price).toLocaleString()}${p.oldPrice ? ` <small style="font-size:1rem;color:var(--gray-500);text-decoration:line-through;">&#8377;${Number(p.oldPrice).toLocaleString()}</small>` : ''}`;
@@ -595,7 +595,7 @@ async function openProductModal(id) {
     const reviewEl = document.getElementById('modalReviews');
     if (dbReviews.length > 0) {
       reviewEl.innerHTML = dbReviews.slice(0, 3).map(r =>
-        `<div style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><strong>${r.customer_name}</strong> ${'★'.repeat(r.rating)}<br><small>${r.text}</small></div>`
+        `<div style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><strong>${r.customer_name}</strong> ${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(r.rating) || 0))))}<br><small>${r.text}</small></div>`
       ).join('');
     } else {
       reviewEl.innerHTML = '<small>No reviews yet. Be the first!</small>';
@@ -748,7 +748,7 @@ async function submitReview() {
     const reviewEl = document.getElementById('modalReviews');
     if (dbReviews.length > 0) {
       reviewEl.innerHTML = dbReviews.slice(0, 3).map(r =>
-        `<div style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><strong>${r.customer_name}</strong> ${'★'.repeat(r.rating)}<br><small>${r.text}</small></div>`
+        `<div style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><strong>${r.customer_name}</strong> ${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(r.rating) || 0))))}<br><small>${r.text}</small></div>`
       ).join('');
     }
   } catch(e) {
@@ -1314,7 +1314,7 @@ function renderReviews() {
           ${r.verified ? '<div class="verified"><i class="fas fa-check-circle"></i> Verified Buyer</div>' : ''}
         </div>
       </div>
-      <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+      <div class="stars">${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(r.rating) || 0))))}${'☆'.repeat(Math.max(0, 5 - Math.floor(Number(r.rating) || 0)))}</div>
       <div class="text">"${r.text}"</div>
       <small style="color:var(--gray-500);display:block;margin-top:8px;">Product: ${r.product}</small>
     </div>
