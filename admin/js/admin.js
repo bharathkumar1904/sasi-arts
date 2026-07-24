@@ -425,13 +425,12 @@ async function editProduct(id) {
   p.customizable = confirm(`Customizable? (Current: ${p.customizable !== false ? 'Yes' : 'No'})\n\nOK = Yes, Cancel = No`);
   saveAdminProducts();
   renderProducts();
-  // Sync to Supabase if product has a db_id
   const dbId = p?.db_id || p?.id;
   if (dbId && typeof dbId === 'number' && dbId < 999999999) {
     try {
       const updates = {};
       if (name) updates.name = name;
-      if (price) updates.price = parseInt(price);
+      if (price) updates.price = parseInt(price, 10);
       if (category) updates.category = category;
       if (imageUrl) updates.image = imageUrl;
       if (sizesStr) updates.sizes = p.sizes;
@@ -439,10 +438,14 @@ async function editProduct(id) {
       if (extraImages) updates.images = p.images;
       updates.customizable = p.customizable !== false;
       const r = await updateProductInDB(dbId, updates);
-      if (r.error) console.error('Supabase update error:', r.error);
+      if (r.error) { console.error('Supabase update error:', r.error); showBanner('Product updated locally. Supabase sync failed.', 'error'); }
+      else showBanner('Product updated & synced to Supabase!', 'success');
     } catch(e) {
       console.warn('Supabase sync skipped:', e.message);
+      showBanner('Product updated locally. Supabase sync skipped.', 'error');
     }
+  } else {
+    showBanner('Product updated locally.', 'success');
   }
 }
 async function deleteProduct(id) {
@@ -452,19 +455,22 @@ async function deleteProduct(id) {
   adminProducts = adminProducts.map(x => x.id === id ? { ...x, _deleted: true } : x);
   saveAdminProducts();
   renderProducts();
-  // Delete from Supabase
   let dbId = p?.db_id || p?.id;
-  if (!dbId) { console.warn('No ID for this product'); return; }
-  // If dbId is a Date.now() number (local-only product), skip DB delete
-  if (typeof dbId === 'number' && dbId > 999999999) { return; }
+  if (!dbId || (typeof dbId === 'number' && dbId > 999999999)) {
+    showBanner(p.name + ' deleted locally.', 'success');
+    return;
+  }
   try {
     const r = await deleteProductFromDB(dbId);
-    if (r.error) console.error('Supabase delete error:', r.error);
-    else {
+    if (r.error) {
+      console.error('Supabase delete error:', r.error);
+      showBanner(p.name + ' deleted locally. Supabase sync failed.', 'error');
+    } else {
       const deleted = JSON.parse(localStorage.getItem('sasiDeletedSupabaseIds') || '[]');
       if (!deleted.includes(dbId)) { deleted.push(dbId); localStorage.setItem('sasiDeletedSupabaseIds', JSON.stringify(deleted)); }
+      showBanner(p.name + ' deleted & synced to Supabase!', 'success');
     }
-  } catch(e) { console.warn('Supabase sync skipped:', e.message); }
+  } catch(e) { console.warn('Supabase sync skipped:', e.message); showBanner(p.name + ' deleted locally. Supabase sync skipped.', 'error'); }
 }
 
 // ===== ORDERS =====
@@ -984,7 +990,7 @@ async function renderBestsellers() {
       <td><strong>${p.name}</strong></td>
       <td>${p.category}</td>
       <td>&#8377;${p.price}</td>
-      <td>${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 >= 0.5 ? '½' : ''}</td>
+      <td>${'★'.repeat(Math.max(0, Math.min(5, Math.floor(Number(p.rating) || 0))))}${p.rating % 1 >= 0.5 ? '½' : ''}</td>
       <td><span class="badge ${isBest ? 'badge-success' : 'badge-danger'}" style="font-size:12px;">${isBest ? '⭐ YES' : '—'}</span></td>
       <td>
         <button class="btn ${isBest ? 'btn-outline' : 'btn-primary'} btn-sm" onclick="toggleBestseller(${p.id})">
@@ -1003,14 +1009,14 @@ async function toggleBestseller(id) {
   p.bestSeller = newVal;
   saveAdminProducts();
   renderBestsellers();
-  showToast(`${p.name} ${newVal ? 'added to' : 'removed from'} Best Sellers`);
-  // Sync to Supabase using the actual DB id if available
   const dbId = p.db_id || p.id;
   try {
     const r = await updateProductInDB(dbId, { is_best_seller: newVal });
-    if (r.error) console.error('Supabase sync error:', r.error);
+    if (r.error) { console.error('Supabase sync error:', r.error); showBanner(p.name + (newVal ? ' added to' : ' removed from') + ' Best Sellers (local only)', 'error'); }
+    else showBanner(p.name + (newVal ? ' added to' : ' removed from') + ' Best Sellers!', 'success');
   } catch(e) {
     console.warn('Synced locally, Supabase sync skipped:', e.message);
+    showBanner(p.name + (newVal ? ' added to' : ' removed from') + ' Best Sellers (local only)', 'error');
   }
 }
 

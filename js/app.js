@@ -102,43 +102,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadOfferFromSupabase().catch(() => {});
 
-  loadProductsFromDB().then(dbProducts => {
-    if (dbProducts && dbProducts.length > 0) {
-      // Merge Supabase products with local ones — preserve bestseller, oldPrice, etc.
-      const dbMapped = dbProducts.map(p => ({
-        ...p,
-        oldPrice: p.old_price || p.oldPrice,
-        reviews: p.reviews_count || p.reviews || 0,
-        bestSeller: p.is_best_seller === true || p.bestSeller === true,
-        is_active: p.is_active !== false
-      }));
-      // Keep local products not in DB (e.g. fallback samples) and merge DB ones
-      const localMap = new Map(PRODUCTS.map(p => [p.id, p]));
-      dbMapped.forEach(p => {
-        const existing = localMap.get(p.id);
-        // Preserve local bestSeller flag (admin may have toggled it) and local customizations
-        if (existing) {
-          localMap.set(p.id, { ...p, bestSeller: existing.bestSeller, is_best_seller: existing.is_best_seller, is_active: existing.is_active !== false });
-        } else {
-          localMap.set(p.id, p);
+  async function fetchSupabaseProducts(retries) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const dbProducts = await loadProductsFromDB();
+        if (dbProducts && dbProducts.length > 0) {
+          const dbMapped = dbProducts.map(p => ({
+            ...p,
+            oldPrice: p.old_price || p.oldPrice,
+            reviews: p.reviews_count || p.reviews || 0,
+            bestSeller: p.is_best_seller === true || p.bestSeller === true,
+            is_active: p.is_active !== false
+          }));
+          const localMap = new Map(PRODUCTS.map(p => [p.id, p]));
+          dbMapped.forEach(p => {
+            const existing = localMap.get(p.id);
+            if (existing) {
+              localMap.set(p.id, { ...p, bestSeller: existing.bestSeller, is_best_seller: existing.is_best_seller, is_active: existing.is_active !== false });
+            } else {
+              localMap.set(p.id, p);
+            }
+          });
+          PRODUCTS = Array.from(localMap.values());
+          applyAdminEdits();
+          try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e) {
+            for (let j = localStorage.length - 1; j >= 0; j--) { const k = localStorage.key(j); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
+            try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); }
+          }
+          renderAll();
+          const shopPage = document.getElementById('shop-page');
+          if (shopPage && shopPage.style.display === 'block') {
+            renderShopProducts(PRODUCTS, shopCurrentCategory);
+          }
+          const banner = document.getElementById('supabase-error-banner');
+          if (banner) banner.remove();
+          return;
         }
-      });
-      PRODUCTS = Array.from(localMap.values());
-      // Admin edits win over Supabase
-      applyAdminEdits();
-      // Save to a separate cache for admin panel view
-      try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e) {
-        for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && !k.startsWith('sasi') && k !== 'adminProducts') localStorage.removeItem(k); }
-        try { localStorage.setItem('supabaseProducts', JSON.stringify(PRODUCTS)); } catch(e2) { console.warn('supabaseProducts cache skipped (quota):', e2.message); }
-      }
-      renderAll();
-      // Re-render shop page if it's currently open (so Supabase products appear immediately)
-      const shopPage = document.getElementById('shop-page');
-      if (shopPage && shopPage.style.display === 'block') {
-        renderShopProducts(PRODUCTS, shopCurrentCategory);
+      } catch(e) {
+        console.warn(`Supabase fetch attempt ${i + 1} failed:`, e.message);
+        if (i < retries) await new Promise(r => setTimeout(r, 2000));
       }
     }
-  }).catch(e => console.warn('Supabase load failed, using sample data:', e.message));
+    console.warn('Supabase load failed after retries, using sample data');
+    const existing = document.getElementById('supabase-error-banner');
+    if (!existing) {
+      const b = document.createElement('div');
+      b.id = 'supabase-error-banner';
+      b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1A1A2E;color:#fff;padding:12px 20px;font-size:13px;text-align:center;font-family:Poppins,sans-serif;border-top:3px solid #FF6B00;';
+      b.innerHTML = '⚠️ Could not load all products. Showing basic catalogue. <a href="javascript:location.reload()" style="color:#FF6B00;text-decoration:underline;margin-left:8px;">Retry</a>';
+      document.body.appendChild(b);
+    }
+  }
+  fetchSupabaseProducts(2);
 
   setTimeout(() => {
     if (!localStorage.getItem('leadPopupShown')) {
