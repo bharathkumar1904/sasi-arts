@@ -15,6 +15,17 @@ function showToast(message, type = 'success') {
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
+function showBanner(message, type) {
+  const old = document.getElementById('admin-banner');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.id = 'admin-banner';
+  const bg = type === 'success' ? '#22C55E' : '#FF4444';
+  b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:' + bg + ';color:#fff;padding:16px 24px;font-size:15px;font-weight:600;text-align:center;font-family:Poppins,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+  b.textContent = message;
+  document.body.appendChild(b);
+  setTimeout(() => { b.style.opacity = '0'; b.style.transition = 'opacity 0.5s'; setTimeout(() => b.remove(), 500); }, 4000);
+}
 
 // ===== SUPABASE AUTH =====
 let adminAuthed = false;
@@ -386,9 +397,9 @@ async function addProduct() {
   preview.style.display = 'none';
   delete preview.dataset.imageData;
   if (supabaseError) {
-    alert('Product saved locally. Supabase sync failed:\n' + (supabaseErrorMsg || 'unknown error'));
+    showBanner('Product saved locally. Supabase sync failed: ' + (supabaseErrorMsg || 'unknown error'), 'error');
   } else {
-    alert('Product added successfully' + (dbId ? ' & synced to Supabase!' : '!'));
+    showBanner('Product added successfully' + (dbId ? ' & synced to Supabase!' : '!'), 'success');
   }
 }
 async function editProduct(id) {
