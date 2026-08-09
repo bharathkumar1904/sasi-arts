@@ -9,8 +9,8 @@ payment processing, admin automation, and WhatsApp order flow.
 - **Dual Checkout** — Online payments AND WhatsApp-based ordering with
   automatic custom-quote flow
 - **19+ Table PostgreSQL Backend** — Full relational schema with
-  Row-Level-Security policies (products, orders, reviews, loyalty, reminders,
-  corporate orders, offers, wishlists, newsletter)
+  Row-Level-Security policies (products, orders, reviews, reminders,
+  corporate orders, wishlists)
 - **Admin Panel** — Supabase-Auth-protected admin UI for products, orders,
   inventory, lead pipeline, printable invoices
 - **Offline-first UX** — local-then-sync data layer keeps cart/orders working
