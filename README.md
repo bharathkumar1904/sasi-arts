@@ -8,7 +8,7 @@ payment processing, admin automation, and WhatsApp order flow.
   verification (via Vercel serverless function) for fraud-proof transactions
 - **Dual Checkout** — Online payments AND WhatsApp-based ordering with
   automatic custom-quote flow
-- **19+ Table PostgreSQL Backend** — Full relational schema with
+- **39+ Table PostgreSQL Backend** — Full relational schema with
   Row-Level-Security policies (products, orders, reviews, reminders,
   corporate orders, wishlists)
 - **Admin Panel** — Supabase-Auth-protected admin UI for products, orders,
@@ -34,7 +34,7 @@ Browser (SPA) → Vercel Edge/(static) → Serverless Functions
 | POST /api/shipping | pincode → shipping zone + charge |
 | POST /api/supabase-proxy | REST relay (bypasses CORS) |
 
-## Database Schema — 19 tables at a glance (products, categories, customers, leads, orders, order_items, reviews, loyalty, campaigns, birthday_reminders, anniversary_reminders, corporate_orders, offers, wishlists, newsletter_subscribers …) with RLS summary.
+## Database Schema — 19 tables at a glance (products, categories, customers, leads, orders, order_items, reviews, corporate_orders, offers, wishlists …) with RLS summary.
 
 ## Getting Started
 Setup config.js → Supabase project → run schema.sql + storage.sql → add
