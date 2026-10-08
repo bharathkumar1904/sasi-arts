@@ -8,7 +8,7 @@ payment processing, admin automation, and WhatsApp order flow.
   verification (via Vercel serverless function) for fraud-proof transactions
 - **Dual Checkout** — Online payments AND WhatsApp-based ordering with
   automatic custom-quote flow
-- **39+ Table PostgreSQL Backend** — Full relational schema with
+- **15-Table PostgreSQL Backend** — Full relational schema with
   Row-Level-Security policies (products, orders, reviews, reminders,
   corporate orders, wishlists)
 - **Admin Panel** — Supabase-Auth-protected admin UI for products, orders,
@@ -29,19 +29,20 @@ Browser (SPA) → Vercel Edge/(static) → Serverless Functions
 
 ## API Endpoints
 | Endpoint | Action | Description |
+| --- | --- | --- |
 | POST /api/razorpay-order {action:create} | create Razorpay order |
 | POST /api/razorpay-order {action:verify} | verify signature (HMAC) |
 | POST /api/shipping | pincode → shipping zone + charge |
 | POST /api/supabase-proxy | REST relay (bypasses CORS) |
 
-## Database Schema — 19 tables at a glance (products, categories, customers, leads, orders, order_items, reviews, corporate_orders, offers, wishlists …) with RLS summary.
+## Database Schema — 15 tables at a glance (products, categories, customers, leads, orders, order_items, reviews, corporate_orders, offers, wishlists …) with RLS summary.
 
 ## Getting Started
 Setup config.js → Supabase project → run schema.sql + storage.sql → add
 EmailJS/Razorpay keys as env vars (Vercel) → deploy.
 ## Deployment
 Vercel static + serverless; custom domain + CDN; SEO package (sitemap,
-robots, Open Graph, Google Analytics).
+robots, Open Graph).
 ## Security Notes
 - secret stored only server-side (env vars)
 - RLS for public tables
